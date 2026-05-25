@@ -622,11 +622,7 @@
   <a href="#" data-section="dedicatories-section" onclick="showSection('dedicatories-section', this)">✍️ Dedicatòries</a>
 </nav>
 
-<!-- ═══ CONFIG BANNER ═══ -->
-<div class="config-banner" id="config-banner">
-  ⚙️ Per activar la pujada de fotos, configura les teves claus de <strong>Cloudinary</strong> i <strong>JSONBin</strong> al codi font.
-  <a href="#" onclick="document.getElementById('config-banner').style.display='none'">✕ Tancar</a>
-</div>
+
 
 <!-- ═══════════════════════════ -->
 <!-- SECCIÓ 1: PUJA FOTOS       -->
@@ -735,22 +731,21 @@
 <!-- ═══════════════════════════════════════════════════════ -->
 <script>
   // ══════════════════════════════════════════
-  // CONFIGURACIÓ — OMPLE AQUÍ LES TEVES CLAUS
+  // CONFIGURACIÓ
   // ══════════════════════════════════════════
   const CONFIG = {
-    // CLOUDINARY — https://cloudinary.com (compte gratuït)
+    // CLOUDINARY — https://cloudinary.com
     cloudinary: {
-      cloudName: 'EL_TEU_CLOUD_NAME',        // p.ex. 'felip50'
-      uploadPreset: 'EL_TEU_UPLOAD_PRESET',  // p.ex. 'festa_felip'
+      cloudName: 'dibqbrpb7',
+      uploadPreset: 'Festafelip',
     },
-    // JSONBIN — https://jsonbin.io (compte gratuït)
-    jsonbin: {
-      binId: 'EL_TEU_BIN_ID',               // p.ex. '6654f3abc...'
-      apiKey: 'LA_TEVA_API_KEY',            // p.ex. '$2a$10$...'
+    // NPOINT — https://npoint.io
+    npoint: {
+      docId: '723160a121953f77a8ad',
     }
   };
 
-  const DEMO_MODE = (CONFIG.cloudinary.cloudName === 'EL_TEU_CLOUD_NAME');
+  const DEMO_MODE = false;
 
   // ══════════════════════════════
   // NAVEGACIÓ
@@ -989,20 +984,17 @@
   }
 
   // ══════════════════════════════
-  // JSONBIN HELPERS
+  // NPOINT HELPERS
   // ══════════════════════════════
   async function fetchBinData() {
-    const r = await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbin.binId}/latest`, {
-      headers: { 'X-Master-Key': CONFIG.jsonbin.apiKey }
-    });
-    const d = await r.json();
-    return d.record;
+    const r = await fetch(`https://api.npoint.io/${CONFIG.npoint.docId}`);
+    return await r.json();
   }
 
   async function updateBin(data) {
-    await fetch(`https://api.jsonbin.io/v3/b/${CONFIG.jsonbin.binId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json', 'X-Master-Key': CONFIG.jsonbin.apiKey },
+    await fetch(`https://api.npoint.io/${CONFIG.npoint.docId}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
   }
