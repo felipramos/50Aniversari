@@ -885,8 +885,12 @@
     } else {
       try {
         const data = await fetchBinData();
+        console.log('npoint data:', data);
         photos = data.photos || [];
-      } catch(e) { photos = []; }
+      } catch(e) {
+        console.error('Error carregant galeria:', e);
+        photos = [];
+      }
     }
 
     if (photos.length === 0) {
@@ -992,11 +996,16 @@
   }
 
   async function updateBin(data) {
-    await fetch(`https://api.npoint.io/${CONFIG.npoint.docId}`, {
-      method: 'POST',
+    const r = await fetch(`https://api.npoint.io/${CONFIG.npoint.docId}`, {
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
     });
+    if (!r.ok) {
+      const txt = await r.text();
+      console.error('npoint update error:', r.status, txt);
+      throw new Error('Error guardant dades: ' + r.status);
+    }
   }
 
   // ══════════════════════════════
