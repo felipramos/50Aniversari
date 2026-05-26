@@ -738,7 +738,7 @@
       cloudName: 'dibqbrpb7',
       uploadPreset: 'Festafelip',
     },
-    sheetsScript: 'https://script.google.com/macros/s/AKfycbyO-7FmmbITGPh_GEFPfLvQBRfoWS48hG37B6LotYmZJBrO7_fu9A5g3Q8HyVr5BjV2/exec',
+    sheetsScript: 'https://script.google.com/macros/s/AKfycbyr6YWUQ1dXv-snsK24-gCGvEJBVFFodVz2QoexO06LeW5F8bSyXXvaJT4KuLvwd_SL/exec',
   };
 
   const DEMO_MODE = false;
@@ -993,12 +993,8 @@
   }
 
   async function saveRow(data) {
-    await fetch(CONFIG.sheetsScript, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
+    const params = new URLSearchParams({ action: 'write', ...data });
+    await fetch(`${CONFIG.sheetsScript}?${params.toString()}`);
   }
 
 
