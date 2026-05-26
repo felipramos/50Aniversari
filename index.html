@@ -934,7 +934,7 @@
       card.className = 'ded-card';
       const dateStr = new Date(d.date).toLocaleDateString('ca', { day: 'numeric', month: 'long', year: 'numeric' });
       card.innerHTML = `
-        <p class="ded-text">« ${d.text} »</p>
+        <p class="ded-text">« ${d.msg} »</p>
         <p class="ded-author">— ${d.name} · ${dateStr}</p>
       `;
       list.appendChild(card);
