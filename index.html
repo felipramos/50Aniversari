@@ -1152,7 +1152,7 @@
   function initAdmin() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('admin') === 'true') {
-      const pass = prompt('Contrasenya d'administrador:');
+      const pass = prompt('Contrasenya administrador:');
       if (pass === ADMIN_PASS) {
         adminUnlocked = true;
         document.getElementById('admin-bar').style.display = 'block';
