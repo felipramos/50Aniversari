@@ -738,10 +738,12 @@
       cloudName: 'dibqbrpb7',
       uploadPreset: 'Festafelip',
     },
-    sheetsScript: 'https://script.google.com/macros/s/AKfycbyr6YWUQ1dXv-snsK24-gCGvEJBVFFodVz2QoexO06LeW5F8bSyXXvaJT4KuLvwd_SL/exec',
+    supabase: {
+      url: 'https://zjxbjbdhroezfwyiougc.supabase.co',
+      key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpqeGJqYmRocm9lemZ3eWlvdWdjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4MTQxNzMsImV4cCI6MjA5NTM5MDE3M30.S6EehhUBN8l09GxiWcW2qrw8yNJLnTPNFnM8sGGQZqU',
+    }
   };
 
-  const DEMO_MODE = false;
 
   // ══════════════════════════════
   // NAVEGACIÓ
@@ -806,11 +808,7 @@
     if (!name) { showStatus(status, 'error', 'Si us plau, escriu el teu nom.'); return; }
     if (selectedFiles.length === 0) { showStatus(status, 'error', 'Selecciona almenys una foto.'); return; }
 
-    if (DEMO_MODE) {
-      showStatus(status, 'success', '✅ Mode demo: les fotos s\'han guardat localment. Configura Cloudinary per activar el mode real.');
-      saveDemoPhotos(name, msg);
-      return;
-    }
+
 
     btn.disabled = true;
     btn.innerHTML = '<span class="loader"></span> Pujant...';
@@ -849,23 +847,6 @@
   }
 
   // ══════════════════════════════
-  // DEMO MODE — LocalStorage
-  // ══════════════════════════════
-  function saveDemoPhotos(name, msg) {
-    const store = JSON.parse(localStorage.getItem('felip50') || '{"photos":[],"dedications":[]}');
-    selectedFiles.forEach((file, i) => {
-      const reader = new FileReader();
-      reader.onload = e => {
-        store.photos.push({ url: e.target.result, name, msg, date: new Date().toISOString() });
-        localStorage.setItem('felip50', JSON.stringify(store));
-      };
-      reader.readAsDataURL(file);
-    });
-    selectedFiles = [];
-    document.getElementById('preview-grid').innerHTML = '';
-    document.getElementById('upload-name').value = '';
-    document.getElementById('upload-msg').value = '';
-  }
 
   // ══════════════════════════════
   // CARREGA GALERIA
@@ -876,11 +857,7 @@
 
     let photos = [];
 
-    if (DEMO_MODE) {
-      const store = JSON.parse(localStorage.getItem('felip50') || '{"photos":[],"dedications":[]}');
-      photos = store.photos || [];
-    } else {
-      try {
+    try {
         const data = await fetchBinData();
         console.log('Google Sheets data:', data);
         photos = data.photos || [];
@@ -888,7 +865,6 @@
         console.error('Error carregant galeria:', e);
         photos = [];
       }
-    }
 
     if (photos.length === 0) {
       grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
@@ -924,17 +900,7 @@
 
     const entry = { name, text, date: new Date().toISOString() };
 
-    if (DEMO_MODE) {
-      const store = JSON.parse(localStorage.getItem('felip50') || '{"photos":[],"dedications":[]}');
-      store.dedications = store.dedications || [];
-      store.dedications.push(entry);
-      localStorage.setItem('felip50', JSON.stringify(store));
-      showStatus(status, 'success', `✅ Dedicatòria guardada. Gràcies, ${name}! 💛`);
-      document.getElementById('ded-name').value = '';
-      document.getElementById('ded-text').value = '';
-      loadDedications();
-    } else {
-      try {
+    try {
         await saveRow({ ...entry, type: 'dedication' });
         showStatus(status, 'success', `✅ Dedicatòria guardada. Gràcies, ${name}! 💛`);
         document.getElementById('ded-name').value = '';
@@ -943,7 +909,6 @@
       } catch(e) {
         showStatus(status, 'error', 'Error en guardar. Torna-ho a intentar.');
       }
-    }
 
     btn.disabled = false;
     btn.innerHTML = 'Enviar dedicatòria 💛';
@@ -953,15 +918,10 @@
     const list = document.getElementById('ded-list');
 
     let deds = [];
-    if (DEMO_MODE) {
-      const store = JSON.parse(localStorage.getItem('felip50') || '{"photos":[],"dedications":[]}');
-      deds = store.dedications || [];
-    } else {
-      try {
+    try {
         const data = await fetchBinData();
         deds = data.dedications || [];
       } catch(e) { deds = []; }
-    }
 
     if (deds.length === 0) {
       list.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha dedicatòries · Sigues el primer! ✍️</p></div>';
@@ -982,10 +942,20 @@
   }
 
   // ══════════════════════════════
-  // GOOGLE SHEETS HELPERS
+  // SUPABASE HELPERS
   // ══════════════════════════════
+  const SB_HEADERS = {
+    'Content-Type': 'application/json',
+    'apikey': CONFIG.supabase.key,
+    'Authorization': `Bearer ${CONFIG.supabase.key}`,
+    'Prefer': 'return=minimal'
+  };
+
   async function fetchBinData() {
-    const r = await fetch(CONFIG.sheetsScript);
+    const r = await fetch(`${CONFIG.supabase.url}/rest/v1/entries?order=id.asc`, {
+      headers: { ...SB_HEADERS, 'Prefer': 'return=representation' }
+    });
+    if (!r.ok) throw new Error('Error llegint dades: ' + r.status);
     const rows = await r.json();
     const photos = rows.filter(r => r.type === 'photo' || !r.type);
     const dedications = rows.filter(r => r.type === 'dedication');
@@ -993,12 +963,19 @@
   }
 
   async function saveRow(data) {
-    const params = new URLSearchParams({ action: 'write', ...data });
-    await fetch(`${CONFIG.sheetsScript}?${params.toString()}`);
+    const r = await fetch(`${CONFIG.supabase.url}/rest/v1/entries`, {
+      method: 'POST',
+      headers: SB_HEADERS,
+      body: JSON.stringify(data)
+    });
+    if (!r.ok) {
+      const txt = await r.text();
+      console.error('Supabase error:', r.status, txt);
+      throw new Error('Error guardant: ' + r.status);
+    }
   }
 
 
-  // ══════════════════════════════
   // LIGHTBOX
   // ══════════════════════════════
   function openLightbox(url) {
