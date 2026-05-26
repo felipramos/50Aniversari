@@ -846,7 +846,11 @@
     document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
-    if (id === 'galeria-section') loadGallery();
+    if (id === 'galeria-section') {
+      loadGallery();
+    } else {
+      stopGalleryRefresh();
+    }
     if (id === 'admin-section') loadAdminPanel();
     if (id === 'dedicatories-section') loadDedications();
     return false;
@@ -945,36 +949,82 @@
   // ══════════════════════════════
   // CARREGA GALERIA
   // ══════════════════════════════
-  async function loadGallery() {
+  let galleryRefreshInterval = null;
+  let currentPage = 0;
+  const PAGE_SIZE = 20;
+  let allPhotos = [];
+
+  async function loadGallery(append = false) {
     const grid = document.getElementById('gallery-grid');
-    grid.innerHTML = '<div class="gallery-empty"><p><span class="loader"></span> Carregant fotos...</p></div>';
-
-    let photos = [];
-
+    if (!append) {
+      grid.innerHTML = '<div class="gallery-empty"><p><span class="loader"></span> Carregant fotos...</p></div>';
+      currentPage = 0; allPhotos = [];
+    }
     try {
-        const data = await fetchBinData();
-        console.log('Google Sheets data:', data);
-        photos = data.photos || [];
-      } catch(e) {
-        console.error('Error carregant galeria:', e);
-        photos = [];
-      }
-
-    if (photos.length === 0) {
-      grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
+      const data = await fetchBinData();
+      allPhotos = (data.photos || []).slice().reverse();
+    } catch(e) {
+      if (!append) grid.innerHTML = '<div class="gallery-empty"><p>Error carregant fotos.</p></div>';
       return;
     }
-
-    grid.innerHTML = '';
-    photos.slice().reverse().forEach(p => {
+    if (allPhotos.length === 0) {
+      grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
+      removePaginationBtn(); return;
+    }
+    if (!append) grid.innerHTML = '';
+    const slice = allPhotos.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
+    slice.forEach(p => {
       const item = document.createElement('div');
       item.className = 'gallery-item';
-      item.innerHTML = `
-        <img src="${p.url}" alt="Foto de ${p.name}" loading="lazy" onclick="openLightbox('${p.url}')" />
-        <div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>
-      `;
+      item.innerHTML = `<img src="${p.url}" alt="Foto de ${p.name}" loading="lazy" /><div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>`;
+      item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
       grid.appendChild(item);
     });
+    currentPage++;
+    removePaginationBtn();
+    if (allPhotos.length > currentPage * PAGE_SIZE) {
+      const btn = document.createElement('div'); btn.id = 'load-more-btn';
+      btn.style.cssText = 'text-align:center;padding:2rem;grid-column:1/-1;';
+      btn.innerHTML = `<button class="btn-gold" style="width:auto;padding:0.8rem 3rem;" onclick="loadMore()">Veure més fotos (${allPhotos.length - currentPage * PAGE_SIZE} restants)</button>`;
+      grid.appendChild(btn);
+    }
+    startGalleryRefresh();
+  }
+
+  function loadMore() { loadGallery(true); }
+  function removePaginationBtn() { const b = document.getElementById('load-more-btn'); if (b) b.remove(); }
+
+  function startGalleryRefresh() {
+    if (galleryRefreshInterval) return;
+    galleryRefreshInterval = setInterval(async () => {
+      try {
+        const data = await fetchBinData();
+        const fresh = (data.photos || []).slice().reverse();
+        if (fresh.length > allPhotos.length) {
+          allPhotos = fresh;
+          const grid = document.getElementById('gallery-grid');
+          currentPage = 0; grid.innerHTML = '';
+          allPhotos.slice(0, PAGE_SIZE).forEach(p => {
+            const item = document.createElement('div'); item.className = 'gallery-item';
+            item.style.animation = 'fadeIn 0.5s ease';
+            item.innerHTML = `<img src="${p.url}" alt="" loading="lazy" /><div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>`;
+            item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+            grid.appendChild(item);
+          });
+          currentPage = 1; removePaginationBtn();
+          if (allPhotos.length > PAGE_SIZE) {
+            const btn = document.createElement('div'); btn.id = 'load-more-btn';
+            btn.style.cssText = 'text-align:center;padding:2rem;grid-column:1/-1;';
+            btn.innerHTML = `<button class="btn-gold" style="width:auto;padding:0.8rem 3rem;" onclick="loadMore()">Veure més fotos (${allPhotos.length - PAGE_SIZE} restants)</button>`;
+            grid.appendChild(btn);
+          }
+        }
+      } catch(e) {}
+    }, 30000);
+  }
+
+  function stopGalleryRefresh() {
+    if (galleryRefreshInterval) { clearInterval(galleryRefreshInterval); galleryRefreshInterval = null; }
   }
 
   // ══════════════════════════════
