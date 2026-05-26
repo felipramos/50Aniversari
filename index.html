@@ -567,7 +567,73 @@
       nav a { padding: 1rem 1rem; font-size: 0.6rem; letter-spacing: 0.15em; }
       .preview-grid { grid-template-columns: repeat(2, 1fr); }
     }
-  </style>
+  
+    /* ── ADMIN ── */
+    .admin-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 3rem;
+    }
+    .admin-card {
+      background: white;
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+      position: relative;
+    }
+    .admin-card img {
+      width: 100%; aspect-ratio: 1; object-fit: cover; display: block;
+    }
+    .admin-card .admin-meta {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.7rem;
+      color: #7a6a55;
+      letter-spacing: 0.05em;
+    }
+    .admin-card .admin-meta strong { color: var(--mid); display: block; }
+    .btn-delete {
+      display: block; width: 100%;
+      padding: 0.5rem;
+      background: #8b2222;
+      color: white;
+      border: none;
+      font-family: 'Josefin Sans', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    .btn-delete:hover { background: #c0392b; }
+    .admin-ded-card {
+      background: white;
+      border-left: 3px solid #8b2222;
+      padding: 1rem 1rem 1rem 1.3rem;
+      border-radius: 0 4px 4px 0;
+      margin-bottom: 0.8rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .admin-ded-card .ded-content { flex: 1; }
+    .admin-ded-card .ded-content strong { font-size: 0.75rem; color: var(--gold-dark); letter-spacing: 0.1em; text-transform: uppercase; }
+    .admin-ded-card .ded-content p { font-family: 'Cormorant Garamond', serif; font-style: italic; color: var(--mid); margin-top: 0.3rem; }
+    .btn-del-small {
+      background: #8b2222; color: white; border: none;
+      border-radius: 3px; padding: 0.4rem 0.8rem;
+      font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase;
+      cursor: pointer; white-space: nowrap;
+      font-family: 'Josefin Sans', sans-serif;
+    }
+    .btn-del-small:hover { background: #c0392b; }
+    .admin-section-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.5rem; font-weight: 300; color: var(--mid);
+      margin: 2rem 0 1rem; font-style: italic;
+    }
+</style>
 </head>
 <body>
 
@@ -621,6 +687,9 @@
   <a href="#" data-section="galeria-section" onclick="showSection('galeria-section', this)">🖼 Galeria</a>
   <a href="#" data-section="dedicatories-section" onclick="showSection('dedicatories-section', this)">✍️ Dedicatòries</a>
 </nav>
+<div id="admin-bar" style="display:none; background:#1a1610; border-top:1px solid rgba(201,168,76,0.2); text-align:center; padding:0.5rem;">
+  <a href="#" style="color:#c9a84c; font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase; text-decoration:none;" onclick="showSection('admin-section', this)">⚙️ Admin</a>
+</div>
 
 
 
@@ -720,6 +789,30 @@
   </div>
 </section>
 
+
+<!-- ═══════════════════════════ -->
+<!-- SECCIÓ ADMIN               -->
+<!-- ═══════════════════════════ -->
+<section class="section" id="admin-section">
+  <div class="section-header">
+    <h2>Panel <em>d'administrador</em></h2>
+    <p>Gestió de continguts de la festa</p>
+    <div class="gold-line"></div>
+  </div>
+
+  <div style="max-width:1100px; margin:0 auto; padding:0 1.5rem 4rem;">
+    <h3 class="admin-section-title">📷 Fotos</h3>
+    <div class="admin-grid" id="admin-photo-grid">
+      <div class="gallery-empty"><p>Carregant...</p></div>
+    </div>
+
+    <h3 class="admin-section-title">✍️ Dedicatòries</h3>
+    <div id="admin-ded-list">
+      <div class="gallery-empty"><p>Carregant...</p></div>
+    </div>
+  </div>
+</section>
+
 <!-- ═══ LIGHTBOX ═══ -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">✕</button>
@@ -754,6 +847,7 @@
     document.getElementById(id).classList.add('active');
     el.classList.add('active');
     if (id === 'galeria-section') loadGallery();
+    if (id === 'admin-section') loadAdminPanel();
     if (id === 'dedicatories-section') loadDedications();
     return false;
   }
@@ -998,7 +1092,111 @@
     setTimeout(() => { el.className = 'status-msg'; }, 6000);
   }
 
+
+  // ══════════════════════════════
+  // ADMIN
+  // ══════════════════════════════
+  const ADMIN_PASS = 'felip50';
+  let adminUnlocked = false;
+
+  function initAdmin() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('admin') === 'true') {
+      const pass = prompt('Contrasenya d'administrador:');
+      if (pass === ADMIN_PASS) {
+        adminUnlocked = true;
+        document.getElementById('admin-bar').style.display = 'block';
+        // Add admin to nav
+        const nav = document.getElementById('main-nav');
+        const adminLink = document.createElement('a');
+        adminLink.href = '#';
+        adminLink.textContent = '⚙️ Admin';
+        adminLink.setAttribute('data-section', 'admin-section');
+        adminLink.onclick = function() { showSection('admin-section', this); return false; };
+        nav.appendChild(adminLink);
+      } else if (pass !== null) {
+        alert('Contrasenya incorrecta.');
+      }
+    }
+  }
+
+  async function loadAdminPanel() {
+    if (!adminUnlocked) return;
+    const photoGrid = document.getElementById('admin-photo-grid');
+    const dedList = document.getElementById('admin-ded-list');
+    photoGrid.innerHTML = '<div class="gallery-empty"><p><span class="loader"></span> Carregant...</p></div>';
+    dedList.innerHTML = '<div class="gallery-empty"><p><span class="loader"></span> Carregant...</p></div>';
+
+    try {
+      const data = await fetchBinData();
+
+      // Photos
+      if (!data.photos.length) {
+        photoGrid.innerHTML = '<div class="gallery-empty"><p>No hi ha fotos.</p></div>';
+      } else {
+        photoGrid.innerHTML = '';
+        data.photos.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'admin-card';
+          card.id = 'entry-' + p.id;
+          card.innerHTML = `
+            <img src="${p.url}" alt="" />
+            <div class="admin-meta">
+              <strong>${p.name}</strong>
+              ${p.msg ? p.msg : ''}
+            </div>
+            <button class="btn-delete" onclick="deleteEntry(${p.id}, 'photo')">🗑 Eliminar</button>
+          `;
+          photoGrid.appendChild(card);
+        });
+      }
+
+      // Dedications
+      if (!data.dedications.length) {
+        dedList.innerHTML = '<div class="gallery-empty"><p>No hi ha dedicatòries.</p></div>';
+      } else {
+        dedList.innerHTML = '';
+        data.dedications.forEach(d => {
+          const card = document.createElement('div');
+          card.className = 'admin-ded-card';
+          card.id = 'entry-' + d.id;
+          card.innerHTML = `
+            <div class="ded-content">
+              <strong>${d.name}</strong>
+              <p>${d.msg}</p>
+            </div>
+            <button class="btn-del-small" onclick="deleteEntry(${d.id}, 'dedication')">🗑 Eliminar</button>
+          `;
+          dedList.appendChild(card);
+        });
+      }
+    } catch(e) {
+      photoGrid.innerHTML = '<div class="gallery-empty"><p>Error carregant dades.</p></div>';
+    }
+  }
+
+  async function deleteEntry(id, type) {
+    const label = type === 'photo' ? 'aquesta foto' : 'aquesta dedicatòria';
+    if (!confirm(`Segur que vols eliminar ${label}?`)) return;
+    try {
+      const r = await fetch(`${CONFIG.supabase.url}/rest/v1/entries?id=eq.${id}`, {
+        method: 'DELETE',
+        headers: SB_HEADERS
+      });
+      if (r.ok) {
+        document.getElementById('entry-' + id).remove();
+      } else {
+        alert('Error en eliminar. Torna-ho a intentar.');
+      }
+    } catch(e) {
+      alert('Error de connexió.');
+    }
+  }
+
   // Scroll hero to nav
+  // Init admin if URL param present
+  initAdmin();
+
   document.querySelector('.hero-scroll').addEventListener('click', () => {
     document.getElementById('main-nav').scrollIntoView({ behavior: 'smooth' });
   });
