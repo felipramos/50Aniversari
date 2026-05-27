@@ -1306,39 +1306,30 @@
     const label = type === 'photo' ? 'aquesta foto' : 'aquesta dedicatòria';
     if (!confirm(`Segur que vols eliminar ${label}?`)) return;
     try {
+      console.log('Deleting entry id:', id, 'type:', type);
+      const deleteHeaders = {
+        ...SB_HEADERS,
+        'Prefer': 'return=representation'
+      };
       const r = await fetch(`${CONFIG.supabase.url}/rest/v1/entries?id=eq.${id}`, {
         method: 'DELETE',
-        headers: SB_HEADERS
+        headers: deleteHeaders
       });
+      console.log('Delete response status:', r.status, r.ok);
+      if (!r.ok) {
+        const errTxt = await r.text();
+        console.error('Delete error:', errTxt);
+        alert('Error en eliminar: ' + errTxt);
+        return;
+      }
       if (r.ok) {
         // Remove from admin panel
         document.getElementById('entry-' + id).remove();
-        // Remove from gallery cache immediately
-        if (type === 'photo') {
-          allPhotos = allPhotos.filter(p => String(p.id) !== String(id));
-          // Re-render gallery if visible
-          const galeria = document.getElementById('galeria-section');
-          if (galeria && galeria.classList.contains('active')) {
-            const grid = document.getElementById('gallery-grid');
-            grid.innerHTML = '';
-            currentPage = 0;
-            if (allPhotos.length === 0) {
-              grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
-            } else {
-              const slice = allPhotos.slice(0, PAGE_SIZE);
-              slice.forEach(p => {
-                const item = document.createElement('div');
-                item.className = 'gallery-item';
-                item.innerHTML = `<img src="${p.url}" alt="Foto de ${p.name}" loading="lazy" /><div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>`;
-                item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
-                grid.appendChild(item);
-              });
-              currentPage = 1;
-            }
-          }
-          // Also force full reload from Supabase after 500ms
-          setTimeout(() => loadGallery(), 500);
-        }
+        // Reset cache and reload gallery from Supabase
+        allPhotos = [];
+        currentPage = 0;
+        stopGalleryRefresh();
+        setTimeout(() => loadGallery(), 800);
       } else {
         alert('Error en eliminar. Torna-ho a intentar.');
       }
