@@ -1311,7 +1311,32 @@
         headers: SB_HEADERS
       });
       if (r.ok) {
+        // Remove from admin panel
         document.getElementById('entry-' + id).remove();
+        // Remove from gallery cache immediately
+        if (type === 'photo') {
+          allPhotos = allPhotos.filter(p => p.id !== id);
+          // Re-render gallery if visible
+          const galeria = document.getElementById('galeria-section');
+          if (galeria && galeria.classList.contains('active')) {
+            const grid = document.getElementById('gallery-grid');
+            grid.innerHTML = '';
+            currentPage = 0;
+            if (allPhotos.length === 0) {
+              grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
+            } else {
+              const slice = allPhotos.slice(0, PAGE_SIZE);
+              slice.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'gallery-item';
+                item.innerHTML = `<img src="${p.url}" alt="Foto de ${p.name}" loading="lazy" /><div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>`;
+                item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+                grid.appendChild(item);
+              });
+              currentPage = 1;
+            }
+          }
+        }
       } else {
         alert('Error en eliminar. Torna-ho a intentar.');
       }
