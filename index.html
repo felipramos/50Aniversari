@@ -1315,7 +1315,7 @@
         document.getElementById('entry-' + id).remove();
         // Remove from gallery cache immediately
         if (type === 'photo') {
-          allPhotos = allPhotos.filter(p => p.id !== id);
+          allPhotos = allPhotos.filter(p => String(p.id) !== String(id));
           // Re-render gallery if visible
           const galeria = document.getElementById('galeria-section');
           if (galeria && galeria.classList.contains('active')) {
@@ -1336,6 +1336,8 @@
               currentPage = 1;
             }
           }
+          // Also force full reload from Supabase after 500ms
+          setTimeout(() => loadGallery(), 500);
         }
       } else {
         alert('Error en eliminar. Torna-ho a intentar.');
