@@ -421,20 +421,9 @@
     }
 
     /* ── LIGHTBOX ── */
-    .lightbox {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(26,50,20,0.97);
-      z-index: 1000;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 1.5rem;
-      padding: 2rem;
-    }
+  
 
-    .lightbox.open { display: flex; }
+  
 
     .lightbox img {
       max-width: 90vw;
@@ -910,10 +899,7 @@
   }
 
   /* ── LIGHTBOX: image fills screen ── */
-  .lightbox {
-    flex-direction: column !important;
-    gap: 1.2rem !important;
-  }
+
   #lightbox-img {
     max-width: 96vw !important;
     max-height: 80vh !important;
@@ -944,20 +930,8 @@
 
   
   /* ── LIGHTBOX V2 ── */
-  #lightbox {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(20,45,15,0.97);
-    z-index: 1000;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 0.8rem;
-    padding: 1rem;
-    touch-action: pan-y;
-  }
-  #lightbox.open { display: flex; }
+
+
 
   .lightbox-close {
     position: absolute;
@@ -1130,6 +1104,25 @@
   @media (max-width: 700px) {
     .gallery-item img, .gallery-item video { height: 160px !important; }
   }
+
+  
+  /* ── LIGHTBOX DEFINITIVE ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    width: 100vw; height: 100vh;
+    background: rgba(20,45,15,0.98);
+    z-index: 9999;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  #lightbox.open { display: flex; }
 
   </style></head>
 <body>
@@ -1561,21 +1554,6 @@
     if (counter) counter.textContent = (index+1) + ' / ' + lightboxPhotos.length;
     if (btnPrev) btnPrev.disabled = index === 0;
     if (btnNext) btnNext.disabled = index === lightboxPhotos.length - 1;
-    // Show date + author below download
-    var lbMeta = document.getElementById('lb-meta');
-    if (lbMeta) {
-      var metaDate = p.date ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      var metaAuthor = p.name || 'Convidat';
-      lbMeta.innerHTML = '<span>&#128100; ' + metaAuthor + '</span>' + (metaDate ? ' &nbsp;·&nbsp; <span>' + metaDate + '</span>' : '');
-    }
-    // Author + date meta
-    var lbMeta = document.getElementById('lb-meta');
-    if (lbMeta) {
-      var metaDate = p.date ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      var metaAuthor = p.name || 'Convidat';
-      var metaMsg = p.msg ? '&ldquo;' + p.msg + '&rdquo; &nbsp;&middot;&nbsp; ' : '';
-      lbMeta.innerHTML = '<span>&#128100; ' + metaAuthor + '</span>' + (metaDate ? ' &nbsp;&middot;&nbsp; ' + metaDate : '') + (p.msg ? '<br><em style="color:rgba(255,255,255,0.7);font-style:italic;">' + p.msg + '</em>' : '');
-    }
     document.getElementById('lightbox').classList.add('open');
   }
 
@@ -1842,6 +1820,17 @@
     // fallback
     var img = document.getElementById('lightbox-img');
     img.src = url; img.style.display = 'block';
+    // Author, message, date in modal
+    var lbMeta = document.getElementById('lb-meta');
+    if (lbMeta) {
+      var metaAuthor = (p.name && p.name.trim()) ? p.name.trim() : 'Convidat';
+      var metaMsg    = (p.msg  && p.msg.trim())  ? p.msg.trim()  : '';
+      var metaDate   = p.date  ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var html = '<strong style="color:#ffcc33;">&#128100; ' + metaAuthor + '</strong>';
+      if (metaDate) html += ' <span style="color:rgba(255,255,255,0.45);">&middot; ' + metaDate + '</span>';
+      if (metaMsg)  html += '<br><em style="color:rgba(255,255,255,0.75);font-style:italic;">&ldquo;' + metaMsg + '&rdquo;</em>';
+      lbMeta.innerHTML = html;
+    }
     document.getElementById('lightbox').classList.add('open');
   }
 
