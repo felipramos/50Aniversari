@@ -1106,6 +1106,17 @@
     margin-bottom: 0.8rem !important;
   }
 
+  
+  #lb-meta {
+    color: rgba(255,255,255,0.55);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-align: center;
+    min-height: 1.2em;
+    padding: 0 1rem;
+  }
+  #lb-meta span { color: rgba(255,204,51,0.75); }
+
   </style></head>
 <body>
 
@@ -1230,8 +1241,8 @@
     <div style="display:flex;align-items:center;gap:0.6rem;">
       <label>Vista:</label>
       <div class="view-toggle">
-        <button id="view-mosaic" class="active" onclick="setView('mosaic')" title="Mosaic">&#x229E; Mosaic</button>
-        <button id="view-list" onclick="setView('list')" title="Llista">&#x2630; Llista</button>
+        <button id="view-mosaic" onclick="setView('mosaic')" title="Mosaic">&#x229E; Mosaic</button>
+        <button id="view-list" class="active" onclick="setView('list')" title="Llista">&#x2630; Llista</button>
       </div>
     </div>
   </div>
@@ -1336,6 +1347,8 @@
     <a id="lightbox-dl" href="#" onclick="event.stopPropagation();return dlLightbox(this)">&#11015; Descarregar</a>
     <button id="lb-next" onclick="event.stopPropagation();lbNav(1)">&#8594;</button>
   </div>
+  <!-- Author + date -->
+  <div id="lb-meta"></div>
 </div>
 
   
@@ -1506,7 +1519,7 @@
   });
   let currentPage = 0;
   let PAGE_SIZE = 20;
-  let currentView = 'mosaic';
+  let currentView = 'list';
   let currentLightboxIndex = -1;
   let lightboxPhotos = [];
 
@@ -1540,6 +1553,14 @@
       var metaDate = p.date ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
       var metaAuthor = p.name || 'Convidat';
       lbMeta.innerHTML = '<span>&#128100; ' + metaAuthor + '</span>' + (metaDate ? ' &nbsp;·&nbsp; <span>' + metaDate + '</span>' : '');
+    }
+    // Author + date meta
+    var lbMeta = document.getElementById('lb-meta');
+    if (lbMeta) {
+      var metaDate = p.date ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      var metaAuthor = p.name || 'Convidat';
+      var metaMsg = p.msg ? '&ldquo;' + p.msg + '&rdquo; &nbsp;&middot;&nbsp; ' : '';
+      lbMeta.innerHTML = '<span>&#128100; ' + metaAuthor + '</span>' + (metaDate ? ' &nbsp;&middot;&nbsp; ' + metaDate : '') + (p.msg ? '<br><em style="color:rgba(255,255,255,0.7);font-style:italic;">' + p.msg + '</em>' : '');
     }
     document.getElementById('lightbox').classList.add('open');
   }
