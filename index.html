@@ -1126,6 +1126,40 @@
   }
   #lightbox.open { display: flex; }
 
+  
+  /* ── LIGHTBOX: ensure meta is always visible ── */
+  #lb-media-wrap {
+    max-height: 55vh !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+  }
+  #lb-media-wrap img, #lb-media-wrap video {
+    max-width: 90vw !important;
+    max-height: 55vh !important;
+    object-fit: contain !important;
+    border-radius: 6px !important;
+  }
+  #lb-controls {
+    flex-shrink: 0 !important;
+  }
+  #lb-meta {
+    flex-shrink: 0 !important;
+    color: #ffffff !important;
+    font-size: 0.85rem !important;
+    text-align: center !important;
+    padding: 0 1rem 0.5rem !important;
+    line-height: 1.6 !important;
+    width: 100% !important;
+    max-width: 420px !important;
+  }
+  #lightbox {
+    justify-content: center !important;
+    overflow-y: auto !important;
+    gap: 0.6rem !important;
+  }
+
   </style></head>
 <body>
 
@@ -1559,7 +1593,6 @@
 
     // ── Author + message + date ──
     var lbMeta = document.getElementById('lb-meta');
-    console.log('lbMeta el:', lbMeta, 'p:', JSON.stringify(p));
     if (lbMeta) {
       var metaAuthor = (p.name && p.name.trim()) ? p.name.trim() : 'Convidat';
       var metaMsg    = (p.msg  && p.msg.trim())  ? p.msg.trim()  : '';
@@ -1568,7 +1601,6 @@
       if (metaMsg)  html += '<div style="color:#ffffff;font-style:italic;font-size:0.88rem;margin-bottom:0.25rem;">&ldquo;' + metaMsg + '&rdquo;</div>';
       if (metaDate) html += '<div style="color:rgba(255,255,255,0.5);font-size:0.72rem;">' + metaDate + '</div>';
       lbMeta.innerHTML = html;
-      console.log('lbMeta HTML set to:', html);
     }
 
     document.getElementById('lightbox').classList.add('open');
