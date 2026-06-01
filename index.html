@@ -1082,14 +1082,15 @@
 
   
   #lb-meta {
-    color: rgba(255,255,255,0.55);
-    font-size: 0.75rem;
-    letter-spacing: 0.08em;
+    color: #ffffff;
+    font-size: 0.82rem;
+    letter-spacing: 0.05em;
     text-align: center;
-    min-height: 1.2em;
-    padding: 0 1rem;
+    padding: 0.2rem 1rem 0.5rem;
+    line-height: 1.6;
+    width: 100%;
+    max-width: 400px;
   }
-  #lb-meta span { color: rgba(255,204,51,0.75); }
 
   
   /* ── MOSAIC: square thumbnails bigger ── */
@@ -1121,6 +1122,7 @@
     padding: 1rem;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    padding-bottom: 2rem;
   }
   #lightbox.open { display: flex; }
 
@@ -1557,14 +1559,16 @@
 
     // ── Author + message + date ──
     var lbMeta = document.getElementById('lb-meta');
+    console.log('lbMeta el:', lbMeta, 'p:', JSON.stringify(p));
     if (lbMeta) {
       var metaAuthor = (p.name && p.name.trim()) ? p.name.trim() : 'Convidat';
       var metaMsg    = (p.msg  && p.msg.trim())  ? p.msg.trim()  : '';
       var metaDate   = p.date  ? new Date(p.date).toLocaleDateString('ca-ES', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
-      var html = '<strong style="color:#ffcc33;font-size:0.9rem;">&#128100; ' + metaAuthor + '</strong>';
-      if (metaDate) html += '&nbsp;&nbsp;<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">' + metaDate + '</span>';
-      if (metaMsg)  html += '<br><em style="color:rgba(255,255,255,0.8);font-style:italic;font-size:0.85rem;">&ldquo;' + metaMsg + '&rdquo;</em>';
+      var html = '<div style="color:#ffcc33;font-size:1rem;font-weight:700;margin-bottom:0.3rem;">&#128100; ' + metaAuthor + '</div>';
+      if (metaMsg)  html += '<div style="color:#ffffff;font-style:italic;font-size:0.88rem;margin-bottom:0.25rem;">&ldquo;' + metaMsg + '&rdquo;</div>';
+      if (metaDate) html += '<div style="color:rgba(255,255,255,0.5);font-size:0.72rem;">' + metaDate + '</div>';
       lbMeta.innerHTML = html;
+      console.log('lbMeta HTML set to:', html);
     }
 
     document.getElementById('lightbox').classList.add('open');
