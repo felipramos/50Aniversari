@@ -986,25 +986,26 @@ border-bottom: 1px solid rgba(122,154,106,0.3);
     slice.forEach(p => {
       const item = document.createElement('div');
       const authorName = p.name || 'Convidat';
+      const dateStr = p.date ? new Date(p.date).toLocaleDateString('ca-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+      const msgHtml = p.msg ? '<div class="list-msg">"' + p.msg + '"</div>' : '';
       if (currentView === 'list') {
         item.className = 'gallery-list-item';
-        item.innerHTML = `
-          <img src="${p.url}" alt="Foto de ${authorName}" loading="lazy" class="list-thumb" />
-          <div class="list-info">
-            <div class="list-author">👤 ${authorName}</div>
-            ${p.msg ? `<div class="list-msg">"${p.msg}"</div>` : ''}
-            <div class="list-date">${p.date ? new Date(p.date).toLocaleDateString('ca-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</div>
-          </div>
-          <a href="${p.url}" download="felip50_foto.jpg" class="dl-btn" title="Descarregar">⬇</a>
-        `;
+        item.innerHTML =
+          '<img src="' + p.url + '" alt="Foto" loading="lazy" class="list-thumb" />' +
+          '<div class="list-info">' +
+            '<div class="list-author">👤 ' + authorName + '</div>' +
+            msgHtml +
+            '<div class="list-date">' + dateStr + '</div>' +
+          '</div>' +
+          '<a href="' + p.url + '" download="felip50_foto.jpg" class="dl-btn" title="Descarregar">⬇</a>';
         item.querySelector('.list-thumb').addEventListener('click', () => openLightbox(p.url));
       } else {
         item.className = 'gallery-item';
-        item.innerHTML = `
-          <img src="${p.url}" alt="Foto de ${authorName}" loading="lazy" />
-          <div class="photo-meta">${authorName}${p.msg ? ' · ' + p.msg : ''}</div>
-          <a href="${p.url}" download="felip50_foto.jpg" class="gallery-dl-btn" title="Descarregar foto">⬇</a>
-        `;
+        const metaMsg = p.msg ? ' · ' + p.msg : '';
+        item.innerHTML =
+          '<img src="' + p.url + '" alt="Foto de ' + authorName + '" loading="lazy" />' +
+          '<div class="photo-meta">' + authorName + metaMsg + '</div>' +
+          '<a href="' + p.url + '" download="felip50_foto.jpg" class="gallery-dl-btn" title="Descarregar foto">⬇</a>';
         item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
       }
       grid.appendChild(item);
