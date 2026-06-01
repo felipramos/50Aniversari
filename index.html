@@ -425,7 +425,7 @@
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(26,22,16,0.95);
+      background: rgba(26,50,20,0.97);
       z-index: 1000;
       align-items: center;
       justify-content: center;
@@ -854,9 +854,10 @@
     gap: 1rem !important;
     background: rgba(255,255,255,0.1) !important;
     border: 1px solid rgba(255,255,255,0.15) !important;
-    border-radius: 6px !important;
-    padding: 0.7rem 1rem !important;
-    margin-bottom: 0.5rem !important;
+    border-radius: 8px !important;
+    padding: 0.8rem 1rem !important;
+    width: 100% !important;
+    max-width: 600px !important;
     cursor: pointer !important;
   }
   .list-thumb, .list-video-wrap video {
@@ -1153,16 +1154,29 @@
 <!-- ═══ LIGHTBOX ═══ -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
   <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
-  <img id="lightbox-img" style="display:block;max-width:92vw;max-height:82vh;border-radius:6px;" src="" alt="" />
-  <video id="lightbox-video" controls playsinline style="display:none;max-width:92vw;max-height:82vh;border-radius:6px;"></video>
-  <a id="lightbox-dl" href="#" download="felip50.jpg" onclick="event.stopPropagation()" style="
-    display:block; margin:0 auto;
-    background:#ffcc33; color:#1a3214;
-    padding:0.7rem 2.5rem; border-radius:6px;
-    font-family:'Century Gothic',sans-serif; font-size:0.88rem;
-    font-weight:700; letter-spacing:0.2em; text-decoration:none;
-    text-align:center; width:fit-content;
-  ">&#11015; Descarregar</a>
+  <div id="lightbox-counter" style="color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:0.15em;text-align:center;"></div>
+  <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;" onclick="event.stopPropagation()">
+    <button id="lb-prev" onclick="lbNav(-1)" style="
+      background:#ffcc33;color:#1a3214;border:none;border-radius:50%;
+      width:44px;height:44px;font-size:1.3rem;cursor:pointer;
+      font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+      transition:opacity 0.2s;">&#8592;</button>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0.8rem;">
+      <img id="lightbox-img" style="display:block;max-width:80vw;max-height:72vh;border-radius:6px;object-fit:contain;" src="" alt="" />
+      <video id="lightbox-video" controls playsinline style="display:none;max-width:80vw;max-height:72vh;border-radius:6px;"></video>
+      <a id="lightbox-dl" href="#" download="felip50.jpg" onclick="event.stopPropagation()" style="
+        display:block;background:#ffcc33;color:#1a3214;
+        padding:0.65rem 2rem;border-radius:6px;
+        font-family:'Century Gothic',sans-serif;font-size:0.85rem;
+        font-weight:700;letter-spacing:0.18em;text-decoration:none;text-align:center;
+      ">&#11015; Descarregar</a>
+    </div>
+    <button id="lb-next" onclick="lbNav(1)" style="
+      background:#ffcc33;color:#1a3214;border:none;border-radius:50%;
+      width:44px;height:44px;font-size:1.3rem;cursor:pointer;
+      font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+      transition:opacity 0.2s;">&#8594;</button>
+  </div>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -1332,6 +1346,39 @@
   let currentPage = 0;
   let PAGE_SIZE = 20;
   let currentView = 'mosaic';
+  let currentLightboxIndex = -1;
+  let lightboxPhotos = [];
+
+  function openLightboxAt(index) {
+    currentLightboxIndex = index;
+    const p = lightboxPhotos[index];
+    if (!p) return;
+    const img = document.getElementById('lightbox-img');
+    const vid = document.getElementById('lightbox-video');
+    const dl  = document.getElementById('lightbox-dl');
+    const counter = document.getElementById('lightbox-counter');
+    if (p.type === 'video') {
+      img.style.display = 'none';
+      vid.style.display = 'block'; vid.src = p.url; vid.play();
+      if (dl) { dl.href = p.url; dl.download = 'felip50.mp4'; }
+    } else {
+      vid.style.display = 'none'; if(vid.src) { vid.pause(); vid.src=''; }
+      img.style.display = 'block'; img.src = p.url;
+      if (dl) { dl.href = p.url; dl.download = 'felip50.jpg'; }
+    }
+    if (counter) counter.textContent = (index+1) + ' / ' + lightboxPhotos.length;
+    // Show/hide nav buttons
+    const btnPrev = document.getElementById('lb-prev');
+    const btnNext = document.getElementById('lb-next');
+    if (btnPrev) btnPrev.style.opacity = index > 0 ? '1' : '0.3';
+    if (btnNext) btnNext.style.opacity = index < lightboxPhotos.length-1 ? '1' : '0.3';
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function lbNav(dir) {
+    const next = currentLightboxIndex + dir;
+    if (next >= 0 && next < lightboxPhotos.length) openLightboxAt(next);
+  }
   let allPhotos = [];
 
   function setView(v) {
@@ -1364,6 +1411,7 @@
       removePaginationBtn(); return;
     }
     if (!append) grid.innerHTML = '';
+    lightboxPhotos = allPhotos; // full list for navigation
     const slice = allPhotos.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
     slice.forEach(p => {
       const item = document.createElement('div');
@@ -1384,7 +1432,7 @@
             msgHtml +
             '<div class="list-date">' + dateStr + '</div>' +
           '</div>' +
-          '<a href="' + p.url + '" download="' + dlName + '" class="dl-btn">&#11015;</a>';
+          '';
         const clickTarget = item.querySelector('.list-video-wrap') || item.querySelector('.list-thumb');
         clickTarget.addEventListener('click', () => isVid ? openLightboxVideo(p.url) : openLightbox(p.url));
       } else {
@@ -1551,31 +1599,32 @@
   // LIGHTBOX
   // ══════════════════════════════
   function openLightbox(url) {
+    const idx = lightboxPhotos.findIndex(p => p.url === url);
+    if (idx >= 0) { openLightboxAt(idx); return; }
+    // fallback
     var img = document.getElementById('lightbox-img');
-    var vid = document.getElementById('lightbox-video');
-    var dl  = document.getElementById('lightbox-dl');
     img.src = url; img.style.display = 'block';
-    vid.style.display = 'none';
-    if (dl) { dl.href = url; dl.download = 'felip50.jpg'; }
     document.getElementById('lightbox').classList.add('open');
   }
 
   function openLightboxVideo(url) {
+    const idx = lightboxPhotos.findIndex(p => p.url === url);
+    if (idx >= 0) { openLightboxAt(idx); return; }
+    // fallback
     var vid = document.getElementById('lightbox-video');
-    var img = document.getElementById('lightbox-img');
-    var dl  = document.getElementById('lightbox-dl');
-    img.style.display = 'none';
-    vid.style.display = 'block'; vid.src = url; vid.play();
-    if (dl) { dl.href = url; dl.download = 'felip50.mp4'; }
+    vid.src = url; vid.style.display = 'block'; vid.play();
     document.getElementById('lightbox').classList.add('open');
   }
 
   function closeLightbox() {
     const v = document.getElementById('lightbox-video'); if(v){v.pause();v.src='';}
     document.getElementById('lightbox').classList.remove('open');
+    currentLightboxIndex = -1;
   }
 
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeLightbox();
+    if (e.key === 'ArrowRight') lbNav(1);
+    if (e.key === 'ArrowLeft') lbNav(-1); });
 
   // ══════════════════════════════
   // STATUS HELPER
