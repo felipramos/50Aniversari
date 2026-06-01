@@ -1117,6 +1117,20 @@
   }
   #lb-meta span { color: rgba(255,204,51,0.75); }
 
+  
+  /* ── MOSAIC: square thumbnails bigger ── */
+  .gallery-item img, .gallery-item video, .video-thumb {
+    width: 100% !important;
+    height: 180px !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 4px 4px 0 0 !important;
+    aspect-ratio: 1 / 1 !important;
+  }
+  @media (max-width: 700px) {
+    .gallery-item img, .gallery-item video { height: 160px !important; }
+  }
+
   </style></head>
 <body>
 
@@ -1566,6 +1580,21 @@
   }
 
 
+  function dlDirect(el, filename) {
+    var url = el.getAttribute('href');
+    fetch(url)
+      .then(function(r){ return r.blob(); })
+      .then(function(blob){
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename || 'felip50.jpg';
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
+      })
+      .catch(function(){ window.open(url, '_blank'); });
+    return false;
+  }
+
   function dlLightbox(el) {
     const url = el.href;
     const filename = el.dataset.filename || 'felip50.jpg';
@@ -1642,8 +1671,8 @@
             '<div class="list-author">&#128100; ' + aName + (isVid ? ' &#127916;' : '') + '</div>' +
             msgHtml +
           '</div>';
-        const clickTarget = item.querySelector('.list-video-wrap') || item.querySelector('.list-thumb');
-        clickTarget.addEventListener('click', () => isVid ? openLightboxVideo(p.url) : openLightbox(p.url));
+        item.style.cursor = 'pointer';
+        item.addEventListener('click', () => openLightbox(p.url));
       } else {
         item.className = 'gallery-item' + (p.type==='video' ? ' gallery-video-item' : '');
         if (p.type === 'video') {
@@ -1659,7 +1688,7 @@
           item.innerHTML =
             '<img src="' + p.url + '" alt="' + aName + '" loading="lazy" />' +
             '<div class="photo-meta">' + aName + (p.msg ? ' · ' + p.msg : '') + '</div>' +
-            '<a href="' + p.url + '" download="felip50.jpg" class="gallery-dl-btn">&#11015;</a>';
+            '<a href="' + p.url + '" class="gallery-dl-btn" onclick="event.stopPropagation();dlDirect(this,\'' + (p.type==='video'?'felip50.mp4':'felip50.jpg') + '\');return false;">&#11015;</a>';
           item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
         }
       }
