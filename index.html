@@ -715,8 +715,138 @@
   }
   .view-toggle button.active { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
 
-  </style>
-</head>
+  
+
+  
+  /* ── INJECTED FROM BODY ── */
+/* ── DOWNLOAD BTN MOSAIC ── */
+  .gallery-dl-btn {
+    position: absolute !important;
+    bottom: 0 !important; right: 0 !important;
+    background: rgba(255,204,51,0.92) !important;
+    color: #1a3214 !important;
+    border: none !important;
+    border-radius: 0 0 4px 0 !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.85rem !important;
+    text-decoration: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+    z-index: 3 !important;
+    font-weight: 700 !important;
+  }
+  .gallery-item:hover .gallery-dl-btn { opacity: 1 !important; }
+  @media (max-width: 600px) { .gallery-dl-btn { opacity: 1 !important; } }
+
+  /* ── TOOLBAR ── */
+  .gallery-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    flex-wrap: wrap !important;
+    padding: 0 1.5rem 1.5rem !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+  }
+  .gallery-toolbar label {
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+  }
+  .gallery-toolbar select {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: 1px solid rgba(255,204,51,0.4) !important;
+    border-radius: 4px !important;
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.85rem !important;
+    cursor: pointer !important;
+    outline: none !important;
+  }
+  .view-toggle { display: flex !important; border: 1px solid rgba(255,204,51,0.4) !important; border-radius: 4px !important; overflow: hidden !important; }
+  .view-toggle button {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: none !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.82rem !important;
+    cursor: pointer !important;
+    letter-spacing: 0.1em !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+  .view-toggle button.active,
+  .view-toggle button#view-mosaic[style*="ffcc33"],
+  .view-toggle button#view-list[style*="ffcc33"] { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
+  
+  /* ── EXTRA CSS ── */
+  /* ── DOWNLOAD BTN MOSAIC ── */
+    .gallery-dl-btn {
+      position: absolute !important;
+      bottom: 0 !important; right: 0 !important;
+      background: rgba(255,204,51,0.92) !important;
+      color: #1a3214 !important;
+      border: none !important;
+      border-radius: 0 0 4px 0 !important;
+      padding: 0.3rem 0.5rem !important;
+      font-size: 0.85rem !important;
+      text-decoration: none !important;
+      opacity: 0 !important;
+      transition: opacity 0.2s !important;
+      z-index: 3 !important;
+      font-weight: 700 !important;
+    }
+    .gallery-item:hover .gallery-dl-btn { opacity: 1 !important; }
+    @media (max-width: 600px) { .gallery-dl-btn { opacity: 1 !important; } }
+  
+    /* ── TOOLBAR ── */
+    .gallery-toolbar {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      gap: 1.5rem !important;
+      flex-wrap: wrap !important;
+      padding: 0 1.5rem 1.5rem !important;
+      max-width: 1100px !important;
+      margin: 0 auto !important;
+    }
+    .gallery-toolbar label {
+      color: rgba(255,255,255,0.85) !important;
+      font-size: 0.78rem !important;
+      letter-spacing: 0.15em !important;
+      text-transform: uppercase !important;
+    }
+    .gallery-toolbar select {
+      background: #4a6a3a !important;
+      color: #ffcc33 !important;
+      border: 1px solid rgba(255,204,51,0.4) !important;
+      border-radius: 4px !important;
+      padding: 0.4rem 0.8rem !important;
+      font-size: 0.85rem !important;
+      cursor: pointer !important;
+      outline: none !important;
+    }
+    .view-toggle { display: flex !important; border: 1px solid rgba(255,204,51,0.4) !important; border-radius: 4px !important; overflow: hidden !important; }
+    .view-toggle button {
+      background: #4a6a3a !important;
+      color: #ffcc33 !important;
+      border: none !important;
+      padding: 0.45rem 1rem !important;
+      font-size: 0.82rem !important;
+      cursor: pointer !important;
+      letter-spacing: 0.1em !important;
+      transition: background 0.2s, color 0.2s !important;
+    }
+    .view-toggle button.active,
+    .view-toggle button#view-mosaic[style*="ffcc33"],
+    .view-toggle button#view-list[style*="ffcc33"] { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
+  
+  </body>
+  </html>
+  
+  
+  </style></head>
 <body>
 
 <!-- ═══ HERO ═══ -->
@@ -1519,68 +1649,3 @@
     document.getElementById('main-nav').scrollIntoView({ behavior: 'smooth' });
   });
 </script>
-
-
-  /* ── DOWNLOAD BTN MOSAIC ── */
-  .gallery-dl-btn {
-    position: absolute !important;
-    bottom: 0 !important; right: 0 !important;
-    background: rgba(255,204,51,0.92) !important;
-    color: #1a3214 !important;
-    border: none !important;
-    border-radius: 0 0 4px 0 !important;
-    padding: 0.3rem 0.5rem !important;
-    font-size: 0.85rem !important;
-    text-decoration: none !important;
-    opacity: 0 !important;
-    transition: opacity 0.2s !important;
-    z-index: 3 !important;
-    font-weight: 700 !important;
-  }
-  .gallery-item:hover .gallery-dl-btn { opacity: 1 !important; }
-  @media (max-width: 600px) { .gallery-dl-btn { opacity: 1 !important; } }
-
-  /* ── TOOLBAR ── */
-  .gallery-toolbar {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 1.5rem !important;
-    flex-wrap: wrap !important;
-    padding: 0 1.5rem 1.5rem !important;
-    max-width: 1100px !important;
-    margin: 0 auto !important;
-  }
-  .gallery-toolbar label {
-    color: rgba(255,255,255,0.85) !important;
-    font-size: 0.78rem !important;
-    letter-spacing: 0.15em !important;
-    text-transform: uppercase !important;
-  }
-  .gallery-toolbar select {
-    background: #4a6a3a !important;
-    color: #ffcc33 !important;
-    border: 1px solid rgba(255,204,51,0.4) !important;
-    border-radius: 4px !important;
-    padding: 0.4rem 0.8rem !important;
-    font-size: 0.85rem !important;
-    cursor: pointer !important;
-    outline: none !important;
-  }
-  .view-toggle { display: flex !important; border: 1px solid rgba(255,204,51,0.4) !important; border-radius: 4px !important; overflow: hidden !important; }
-  .view-toggle button {
-    background: #4a6a3a !important;
-    color: #ffcc33 !important;
-    border: none !important;
-    padding: 0.45rem 1rem !important;
-    font-size: 0.82rem !important;
-    cursor: pointer !important;
-    letter-spacing: 0.1em !important;
-    transition: background 0.2s, color 0.2s !important;
-  }
-  .view-toggle button.active,
-  .view-toggle button#view-mosaic[style*="ffcc33"],
-  .view-toggle button#view-list[style*="ffcc33"] { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
-
-</body>
-</html>
