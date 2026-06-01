@@ -1237,7 +1237,7 @@
 </section>
 
 <!-- ═══ LIGHTBOX ═══ -->
-id="lightbox">
+<div id="lightbox">
   <!-- Close -->
   <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
 
@@ -1258,29 +1258,7 @@ id="lightbox">
   </div>
 </div>
 
-  <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;" onclick="event.stopPropagation()">
-    <button id="lb-prev" onclick="lbNav(-1)" style="
-      background:#ffcc33;color:#1a3214;border:none;border-radius:50%;
-      width:44px;height:44px;font-size:1.3rem;cursor:pointer;
-      font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-      transition:opacity 0.2s;">&#8592;</button>
-    <div style="display:flex;flex-direction:column;align-items:center;gap:0.8rem;">
-      <img id="lightbox-img" style="display:block;max-width:80vw;max-height:72vh;border-radius:6px;object-fit:contain;" src="" alt="" />
-      <video id="lightbox-video" controls playsinline style="display:none;max-width:80vw;max-height:72vh;border-radius:6px;"></video>
-      <a id="lightbox-dl" href="#" download="felip50.jpg" onclick="event.stopPropagation()" style="
-        display:block;background:#ffcc33;color:#1a3214;
-        padding:0.65rem 2rem;border-radius:6px;
-        font-family:'Century Gothic',sans-serif;font-size:0.85rem;
-        font-weight:700;letter-spacing:0.18em;text-decoration:none;text-align:center;
-      ">&#11015; Descarregar</a>
-    </div>
-    <button id="lb-next" onclick="lbNav(1)" style="
-      background:#ffcc33;color:#1a3214;border:none;border-radius:50%;
-      width:44px;height:44px;font-size:1.3rem;cursor:pointer;
-      font-weight:700;flex-shrink:0;display:flex;align-items:center;justify-content:center;
-      transition:opacity 0.2s;">&#8594;</button>
-  </div>
-</div>
+  
 
 <!-- ═══════════════════════════════════════════════════════ -->
 <!-- JAVASCRIPT                                             -->
