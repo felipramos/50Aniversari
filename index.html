@@ -1248,8 +1248,8 @@
     <div style="display:flex;align-items:center;gap:0.6rem;">
       <label>Vista:</label>
       <div class="view-toggle">
-        <button id="view-mosaic" onclick="setView('mosaic')" title="Mosaic">&#x229E; Mosaic</button>
-        <button id="view-list" class="active" onclick="setView('list')" title="Llista">&#x2630; Llista</button>
+        <button id="view-mosaic" class="active" onclick="setView('mosaic')" title="Mosaic">&#x229E; Mosaic</button>
+        <button id="view-list" onclick="setView('list')" title="Llista">&#x2630; Llista</button>
       </div>
     </div>
   </div>
@@ -1526,7 +1526,7 @@
   });
   let currentPage = 0;
   let PAGE_SIZE = 20;
-  let currentView = 'list';
+  let currentView = 'mosaic';
   let currentLightboxIndex = -1;
   let lightboxPhotos = [];
 
@@ -1554,6 +1554,19 @@
     if (counter) counter.textContent = (index+1) + ' / ' + lightboxPhotos.length;
     if (btnPrev) btnPrev.disabled = index === 0;
     if (btnNext) btnNext.disabled = index === lightboxPhotos.length - 1;
+
+    // ── Author + message + date ──
+    var lbMeta = document.getElementById('lb-meta');
+    if (lbMeta) {
+      var metaAuthor = (p.name && p.name.trim()) ? p.name.trim() : 'Convidat';
+      var metaMsg    = (p.msg  && p.msg.trim())  ? p.msg.trim()  : '';
+      var metaDate   = p.date  ? new Date(p.date).toLocaleDateString('ca-ES', {day:'2-digit', month:'short', year:'numeric', hour:'2-digit', minute:'2-digit'}) : '';
+      var html = '<strong style="color:#ffcc33;font-size:0.9rem;">&#128100; ' + metaAuthor + '</strong>';
+      if (metaDate) html += '&nbsp;&nbsp;<span style="color:rgba(255,255,255,0.45);font-size:0.75rem;">' + metaDate + '</span>';
+      if (metaMsg)  html += '<br><em style="color:rgba(255,255,255,0.8);font-style:italic;font-size:0.85rem;">&ldquo;' + metaMsg + '&rdquo;</em>';
+      lbMeta.innerHTML = html;
+    }
+
     document.getElementById('lightbox').classList.add('open');
   }
 
@@ -1574,23 +1587,18 @@
   }
 
   function dlLightbox(el) {
-    const url = el.href;
-    const filename = el.dataset.filename || 'felip50.jpg';
-    // Force download via blob fetch (works on mobile too)
+    var url = el.href;
+    var filename = el.dataset.filename || 'felip50.jpg';
     fetch(url)
-      .then(r => r.blob())
-      .then(blob => {
-        const a = document.createElement('a');
+      .then(function(r){ return r.blob(); })
+      .then(function(blob){
+        var a = document.createElement('a');
         a.href = URL.createObjectURL(blob);
         a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
+        document.body.appendChild(a); a.click();
+        setTimeout(function(){ document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
       })
-      .catch(() => {
-        // Fallback: open in new tab
-        window.open(url, '_blank');
-      });
+      .catch(function(){ window.open(url, '_blank'); });
     return false;
   }
 
@@ -1817,20 +1825,11 @@
   function openLightbox(url) {
     const idx = lightboxPhotos.findIndex(p => p.url === url);
     if (idx >= 0) { openLightboxAt(idx); return; }
-    // fallback
+    // fallback (no metadata available)
     var img = document.getElementById('lightbox-img');
     img.src = url; img.style.display = 'block';
-    // Author, message, date in modal
     var lbMeta = document.getElementById('lb-meta');
-    if (lbMeta) {
-      var metaAuthor = (p.name && p.name.trim()) ? p.name.trim() : 'Convidat';
-      var metaMsg    = (p.msg  && p.msg.trim())  ? p.msg.trim()  : '';
-      var metaDate   = p.date  ? new Date(p.date).toLocaleDateString('ca-ES',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
-      var html = '<strong style="color:#ffcc33;">&#128100; ' + metaAuthor + '</strong>';
-      if (metaDate) html += ' <span style="color:rgba(255,255,255,0.45);">&middot; ' + metaDate + '</span>';
-      if (metaMsg)  html += '<br><em style="color:rgba(255,255,255,0.75);font-style:italic;">&ldquo;' + metaMsg + '&rdquo;</em>';
-      lbMeta.innerHTML = html;
-    }
+    if (lbMeta) lbMeta.innerHTML = '';
     document.getElementById('lightbox').classList.add('open');
   }
 
