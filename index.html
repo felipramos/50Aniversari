@@ -1261,13 +1261,39 @@
     try {
       const urls = [];
       for (const file of selectedFiles) {
+        const fileIsVideo = file.type.startsWith('video/');
+
+        // Validate video
+        if (fileIsVideo) {
+          if (file.size > 50 * 1024 * 1024) {
+            showStatus(status, 'error', 'El vídeo és massa gran (màx. 50MB)');
+            return;
+          }
+          const durationOk = await new Promise(resolve => {
+            const vid = document.createElement('video');
+            vid.preload = 'metadata';
+            vid.onloadedmetadata = () => { URL.revokeObjectURL(vid.src); resolve(vid.duration <= 30); };
+            vid.onerror = () => resolve(true);
+            vid.src = URL.createObjectURL(file);
+          });
+          if (!durationOk) {
+            showStatus(status, 'error', 'El vídeo és massa llarg (màx. 30 segons)');
+            return;
+          }
+        }
+
+        const resourceType = fileIsVideo ? 'video' : 'image';
         const fd = new FormData();
         fd.append('file', file);
         fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
         fd.append('folder', 'felip50');
-        const r = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
+        const r = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/${resourceType}/upload`, { method: 'POST', body: fd });
+        if (!r.ok) {
+          const err = await r.text();
+          throw new Error('Error Cloudinary: ' + r.status + ' ' + err.substring(0, 100));
+        }
         const d = await r.json();
-        if (d.secure_url) urls.push({ url: d.secure_url, type: isVideo ? 'video' : 'photo' });
+        if (d.secure_url) urls.push({ url: d.secure_url, type: fileIsVideo ? 'video' : 'photo' });
       }
 
       // Guarda a Google Sheets
