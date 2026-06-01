@@ -717,6 +717,23 @@
     <div class="gold-line"></div>
   </div>
 
+  <div class="gallery-toolbar" id="gallery-toolbar">
+    <div style="display:flex;align-items:center;gap:0.6rem;">
+      <label for="per-page-select">Per p&agrave;gina:</label>
+      <select id="per-page-select">
+        <option value="20">20</option>
+        <option value="50">50</option>
+        <option value="99999">Totes</option>
+      </select>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.6rem;">
+      <label>Vista:</label>
+      <div class="view-toggle">
+        <button id="view-mosaic" class="active" onclick="setView('mosaic')" title="Mosaic">&#x229E; Mosaic</button>
+        <button id="view-list" onclick="setView('list')" title="Llista">&#x2630; Llista</button>
+      </div>
+    </div>
+  </div>
   <div class="gallery-container">
     <div class="gallery-grid" id="gallery-grid">
       <div class="gallery-empty">
@@ -800,8 +817,17 @@
 
 <!-- ═══ LIGHTBOX ═══ -->
 <div class="lightbox" id="lightbox" onclick="closeLightbox()">
-  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
-  <img id="lightbox-img" src="" alt="" />
+  <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
+  <img id="lightbox-img" style="display:block;max-width:92vw;max-height:82vh;border-radius:6px;" src="" alt="" />
+  <video id="lightbox-video" controls playsinline style="display:none;max-width:92vw;max-height:82vh;border-radius:6px;"></video>
+  <a id="lightbox-dl" href="#" download="felip50.jpg" onclick="event.stopPropagation()" style="
+    display:block; margin-top:1rem;
+    background:#ffcc33; color:#1a3214;
+    padding:0.6rem 2rem; border-radius:4px;
+    font-family:'Century Gothic',sans-serif; font-size:0.85rem;
+    font-weight:700; letter-spacing:0.2em; text-decoration:none;
+    text-align:center; width:fit-content;
+  ">&#11015; Descarregar</a>
 </div>
 
 <!-- ═══════════════════════════════════════════════════════ -->
@@ -906,17 +932,17 @@
         fd.append('folder', 'felip50');
         const r = await fetch(`https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/image/upload`, { method: 'POST', body: fd });
         const d = await r.json();
-        if (d.secure_url) urls.push(d.secure_url);
+        if (d.secure_url) urls.push({ url: d.secure_url, type: isVideo ? 'video' : 'photo' });
       }
 
       // Guarda a Google Sheets
-      for (const url of urls) {
-        await saveRow({ url, name: displayName, msg, date: new Date().toISOString(), type: 'photo' });
+      for (const item of urls) {
+        await saveRow({ url: item.url, name: displayName, msg, date: new Date().toISOString(), type: item.type });
       }
 
       // Petit delay per assegurar que Google Sheets processa
       await new Promise(res => setTimeout(res, 1500));
-      showStatus(status, 'success', `✅ ${urls.length} foto${urls.length > 1 ? 's' : ''} pujada${urls.length > 1 ? 's' : ''} correctament. Gràcies, ${displayName}! 🎉`);
+      showStatus(status, 'success', `✅ ${urls.length} arxiu${urls.length > 1 ? 's' : ''} pujat${urls.length > 1 ? 's' : ''} correctament. Gràcies, ${displayName}! 🎉`);
       selectedFiles = [];
       document.getElementById('preview-grid').innerHTML = '';
       document.getElementById('upload-name').value = '';
@@ -985,22 +1011,39 @@
       const msgHtml = p.msg ? '<div class="list-msg">&ldquo;' + p.msg + '&rdquo;</div>' : '';
       if (currentView === 'list') {
         item.className = 'gallery-list-item';
+        const isVid = p.type === 'video';
+        const thumbHtml = isVid
+          ? '<div class="list-video-wrap"><video src="' + p.url + '" class="list-thumb" preload="metadata" muted></video><div class="list-play">&#9654;</div></div>'
+          : '<img src="' + p.url + '" class="list-thumb" loading="lazy" />';
+        const dlName = isVid ? 'felip50.mp4' : 'felip50.jpg';
         item.innerHTML =
-          '<img src="' + p.url + '" class="list-thumb" loading="lazy" />' +
+          thumbHtml +
           '<div class="list-info">' +
-            '<div class="list-author">&#128100; ' + aName + '</div>' +
+            '<div class="list-author">&#128100; ' + aName + (isVid ? ' &#127916;' : '') + '</div>' +
             msgHtml +
             '<div class="list-date">' + dateStr + '</div>' +
           '</div>' +
-          '<a href="' + p.url + '" download="felip50.jpg" class="dl-btn">&#11015;</a>';
-        item.querySelector('.list-thumb').addEventListener('click', () => openLightbox(p.url));
+          '<a href="' + p.url + '" download="' + dlName + '" class="dl-btn">&#11015;</a>';
+        const clickTarget = item.querySelector('.list-video-wrap') || item.querySelector('.list-thumb');
+        clickTarget.addEventListener('click', () => isVid ? openLightboxVideo(p.url) : openLightbox(p.url));
       } else {
-        item.className = 'gallery-item';
-        item.innerHTML =
-          '<img src="' + p.url + '" alt="' + aName + '" loading="lazy" />' +
-          '<div class="photo-meta">' + aName + (p.msg ? ' · ' + p.msg : '') + '</div>' +
-          '<a href="' + p.url + '" download="felip50.jpg" class="gallery-dl-btn">&#11015;</a>';
-        item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+        item.className = 'gallery-item' + (p.type==='video' ? ' gallery-video-item' : '');
+        if (p.type === 'video') {
+          item.innerHTML =
+            '<div class="video-thumb-wrap">' +
+              '<video src="' + p.url + '" class="video-thumb" preload="metadata" muted playsinline></video>' +
+              '<div class="play-btn">&#9654;</div>' +
+            '</div>' +
+            '<div class="photo-meta">' + aName + (p.msg ? ' · ' + p.msg : '') + '</div>' +
+            '<a href="' + p.url + '" download="felip50.mp4" class="gallery-dl-btn">&#11015;</a>';
+          item.querySelector('.video-thumb-wrap').addEventListener('click', () => openLightboxVideo(p.url));
+        } else {
+          item.innerHTML =
+            '<img src="' + p.url + '" alt="' + aName + '" loading="lazy" />' +
+            '<div class="photo-meta">' + aName + (p.msg ? ' · ' + p.msg : '') + '</div>' +
+            '<a href="' + p.url + '" download="felip50.jpg" class="gallery-dl-btn">&#11015;</a>';
+          item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+        }
       }
       grid.appendChild(item);
     });
@@ -1147,11 +1190,27 @@
   // LIGHTBOX
   // ══════════════════════════════
   function openLightbox(url) {
-    document.getElementById('lightbox-img').src = url;
+    var img = document.getElementById('lightbox-img');
+    var vid = document.getElementById('lightbox-video');
+    var dl  = document.getElementById('lightbox-dl');
+    img.src = url; img.style.display = 'block';
+    vid.style.display = 'none';
+    if (dl) { dl.href = url; dl.download = 'felip50.jpg'; }
+    document.getElementById('lightbox').classList.add('open');
+  }
+
+  function openLightboxVideo(url) {
+    var vid = document.getElementById('lightbox-video');
+    var img = document.getElementById('lightbox-img');
+    var dl  = document.getElementById('lightbox-dl');
+    img.style.display = 'none';
+    vid.style.display = 'block'; vid.src = url; vid.play();
+    if (dl) { dl.href = url; dl.download = 'felip50.mp4'; }
     document.getElementById('lightbox').classList.add('open');
   }
 
   function closeLightbox() {
+    const v = document.getElementById('lightbox-video'); if(v){v.pause();v.src='';}
     document.getElementById('lightbox').classList.remove('open');
   }
 
@@ -1371,5 +1430,67 @@
     .upload-area, .gallery-container, .ded-container { padding-bottom: 3rem !important; }
   }
 </style>
+
+  /* ── DOWNLOAD BTN MOSAIC ── */
+  .gallery-dl-btn {
+    position: absolute !important;
+    bottom: 0 !important; right: 0 !important;
+    background: rgba(255,204,51,0.92) !important;
+    color: #1a3214 !important;
+    border: none !important;
+    border-radius: 0 0 4px 0 !important;
+    padding: 0.3rem 0.5rem !important;
+    font-size: 0.85rem !important;
+    text-decoration: none !important;
+    opacity: 0 !important;
+    transition: opacity 0.2s !important;
+    z-index: 3 !important;
+    font-weight: 700 !important;
+  }
+  .gallery-item:hover .gallery-dl-btn { opacity: 1 !important; }
+  @media (max-width: 600px) { .gallery-dl-btn { opacity: 1 !important; } }
+
+  /* ── TOOLBAR ── */
+  .gallery-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 1.5rem !important;
+    flex-wrap: wrap !important;
+    padding: 0 1.5rem 1.5rem !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+  }
+  .gallery-toolbar label {
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 0.78rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+  }
+  .gallery-toolbar select {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: 1px solid rgba(255,204,51,0.4) !important;
+    border-radius: 4px !important;
+    padding: 0.4rem 0.8rem !important;
+    font-size: 0.85rem !important;
+    cursor: pointer !important;
+    outline: none !important;
+  }
+  .view-toggle { display: flex !important; border: 1px solid rgba(255,204,51,0.4) !important; border-radius: 4px !important; overflow: hidden !important; }
+  .view-toggle button {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: none !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.82rem !important;
+    cursor: pointer !important;
+    letter-spacing: 0.1em !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+  .view-toggle button.active,
+  .view-toggle button#view-mosaic[style*="ffcc33"],
+  .view-toggle button#view-list[style*="ffcc33"] { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
+
 </body>
 </html>
