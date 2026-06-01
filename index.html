@@ -985,9 +985,28 @@ border-bottom: 1px solid rgba(122,154,106,0.3);
     const slice = allPhotos.slice(currentPage * PAGE_SIZE, (currentPage + 1) * PAGE_SIZE);
     slice.forEach(p => {
       const item = document.createElement('div');
-      item.className = 'gallery-item';
-      item.innerHTML = `<img src="${p.url}" alt="Foto de ${p.name}" loading="lazy" /><div class="photo-meta">${p.name}${p.msg ? ' · ' + p.msg : ''}</div>`;
-      item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+      const authorName = p.name || 'Convidat';
+      if (currentView === 'list') {
+        item.className = 'gallery-list-item';
+        item.innerHTML = `
+          <img src="${p.url}" alt="Foto de ${authorName}" loading="lazy" class="list-thumb" />
+          <div class="list-info">
+            <div class="list-author">👤 ${authorName}</div>
+            ${p.msg ? `<div class="list-msg">"${p.msg}"</div>` : ''}
+            <div class="list-date">${p.date ? new Date(p.date).toLocaleDateString('ca-ES', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}</div>
+          </div>
+          <a href="${p.url}" download="felip50_foto.jpg" class="dl-btn" title="Descarregar">⬇</a>
+        `;
+        item.querySelector('.list-thumb').addEventListener('click', () => openLightbox(p.url));
+      } else {
+        item.className = 'gallery-item';
+        item.innerHTML = `
+          <img src="${p.url}" alt="Foto de ${authorName}" loading="lazy" />
+          <div class="photo-meta">${authorName}${p.msg ? ' · ' + p.msg : ''}</div>
+          <a href="${p.url}" download="felip50_foto.jpg" class="gallery-dl-btn" title="Descarregar foto">⬇</a>
+        `;
+        item.querySelector('img').addEventListener('click', () => openLightbox(p.url));
+      }
       grid.appendChild(item);
     });
     currentPage++;
@@ -1573,6 +1592,102 @@ border-bottom: 1px solid rgba(122,154,106,0.3);
       object-fit: cover !important;
       object-position: top center !important;
     }
+  }
+</style>
+<style>
+  /* ── GALLERY LIST VIEW ── */
+  .gallery-grid.list-view {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.6rem !important;
+    columns: unset !important;
+  }
+  .gallery-list-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 6px;
+    padding: 0.7rem 1rem;
+    transition: background 0.2s;
+  }
+  .gallery-list-item:hover { background: rgba(255,255,255,0.16); }
+  .list-thumb {
+    width: 70px;
+    height: 70px;
+    object-fit: cover;
+    border-radius: 4px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: opacity 0.2s;
+  }
+  .list-thumb:hover { opacity: 0.85; }
+  .list-info {
+    flex: 1;
+    min-width: 0;
+  }
+  .list-author {
+    color: #ffcc33;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    font-family: 'Century Gothic', sans-serif;
+  }
+  .list-msg {
+    color: rgba(255,255,255,0.85);
+    font-size: 0.82rem;
+    font-style: italic;
+    margin-bottom: 0.2rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .list-date {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── DOWNLOAD BUTTON (list view) ── */
+  .dl-btn {
+    flex-shrink: 0;
+    background: rgba(255,204,51,0.15);
+    border: 1px solid rgba(255,204,51,0.4);
+    color: #ffcc33;
+    border-radius: 4px;
+    padding: 0.5rem 0.7rem;
+    font-size: 1rem;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .dl-btn:hover { background: rgba(255,204,51,0.3); }
+
+  /* ── DOWNLOAD BUTTON (mosaic view) ── */
+  .gallery-item {
+    position: relative;
+  }
+  .gallery-dl-btn {
+    position: absolute;
+    bottom: 30px;
+    right: 6px;
+    background: rgba(26,50,20,0.85);
+    border: 1px solid rgba(255,204,51,0.5);
+    color: #ffcc33;
+    border-radius: 4px;
+    padding: 0.25rem 0.4rem;
+    font-size: 0.75rem;
+    text-decoration: none;
+    opacity: 0;
+    transition: opacity 0.2s;
+    z-index: 2;
+  }
+  .gallery-item:hover .gallery-dl-btn { opacity: 1; }
+
+  @media (max-width: 600px) {
+    .list-thumb { width: 55px; height: 55px; }
+    .list-msg { display: none; }
+    .gallery-dl-btn { opacity: 1; }
   }
 </style>
 </body>
