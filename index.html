@@ -942,6 +942,91 @@
     text-align: center !important;
   }
 
+  
+  /* ── LIGHTBOX V2 ── */
+  #lightbox {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(20,45,15,0.97);
+    z-index: 1000;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    padding: 1rem;
+    touch-action: pan-y;
+  }
+  #lightbox.open { display: flex; }
+
+  .lightbox-close {
+    position: absolute;
+    top: 1rem; right: 1.2rem;
+    color: #ffcc33; font-size: 1.6rem;
+    cursor: pointer; background: none; border: none;
+    z-index: 10; line-height: 1;
+  }
+
+  #lightbox-counter {
+    color: rgba(255,255,255,0.5);
+    font-size: 0.75rem; letter-spacing: 0.15em;
+  }
+
+  #lb-media-wrap {
+    display: flex; align-items: center; justify-content: center;
+    max-width: 92vw; max-height: 72vh;
+  }
+  #lb-media-wrap img, #lb-media-wrap video {
+    max-width: 92vw; max-height: 72vh;
+    object-fit: contain; border-radius: 6px;
+    display: block;
+  }
+  #lb-media-wrap video { display: none; }
+
+  #lb-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    width: 100%;
+    max-width: 500px;
+    padding: 0 0.5rem;
+  }
+
+  #lb-prev, #lb-next {
+    background: #ffcc33;
+    color: #1a3214;
+    border: none;
+    border-radius: 50%;
+    width: 48px; height: 48px;
+    min-width: 48px;
+    font-size: 1.4rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: opacity 0.2s, background 0.2s;
+  }
+  #lb-prev:disabled, #lb-next:disabled { opacity: 0.25; cursor: default; }
+  #lb-prev:hover:not(:disabled), #lb-next:hover:not(:disabled) { background: #ffe066; }
+
+  #lightbox-dl {
+    flex: 1;
+    background: #ffcc33;
+    color: #1a3214;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 0.88rem;
+    letter-spacing: 0.15em;
+    text-decoration: none;
+    text-align: center;
+    cursor: pointer;
+  }
+  #lightbox-dl:hover { background: #ffe066; }
+
   </style></head>
 <body>
 
@@ -1152,9 +1237,27 @@
 </section>
 
 <!-- ═══ LIGHTBOX ═══ -->
-<div class="lightbox" id="lightbox" onclick="closeLightbox()">
+id="lightbox">
+  <!-- Close -->
   <button class="lightbox-close" onclick="closeLightbox()">&#x2715;</button>
-  <div id="lightbox-counter" style="color:rgba(255,255,255,0.5);font-size:0.75rem;letter-spacing:0.15em;text-align:center;"></div>
+
+  <!-- Counter -->
+  <div id="lightbox-counter"></div>
+
+  <!-- Media -->
+  <div id="lb-media-wrap">
+    <img id="lightbox-img" src="" alt="" />
+    <video id="lightbox-video" controls playsinline></video>
+  </div>
+
+  <!-- Nav + Download row -->
+  <div id="lb-controls">
+    <button id="lb-prev" onclick="event.stopPropagation();lbNav(-1)">&#8592;</button>
+    <a id="lightbox-dl" href="#" onclick="event.stopPropagation();return dlLightbox(this)">&#11015; Descarregar</a>
+    <button id="lb-next" onclick="event.stopPropagation();lbNav(1)">&#8594;</button>
+  </div>
+</div>
+
   <div style="position:relative;display:flex;align-items:center;justify-content:center;gap:1rem;" onclick="event.stopPropagation()">
     <button id="lb-prev" onclick="lbNav(-1)" style="
       background:#ffcc33;color:#1a3214;border:none;border-radius:50%;
@@ -1357,22 +1460,45 @@
     const vid = document.getElementById('lightbox-video');
     const dl  = document.getElementById('lightbox-dl');
     const counter = document.getElementById('lightbox-counter');
+    const btnPrev = document.getElementById('lb-prev');
+    const btnNext = document.getElementById('lb-next');
+
     if (p.type === 'video') {
       img.style.display = 'none';
       vid.style.display = 'block'; vid.src = p.url; vid.play();
-      if (dl) { dl.href = p.url; dl.download = 'felip50.mp4'; }
+      if (dl) { dl.href = p.url; dl.dataset.filename = 'felip50.mp4'; dl.dataset.type = 'video'; }
     } else {
-      vid.style.display = 'none'; if(vid.src) { vid.pause(); vid.src=''; }
+      if (vid.src) { vid.pause(); vid.src = ''; }
+      vid.style.display = 'none';
       img.style.display = 'block'; img.src = p.url;
-      if (dl) { dl.href = p.url; dl.download = 'felip50.jpg'; }
+      if (dl) { dl.href = p.url; dl.dataset.filename = 'felip50.jpg'; dl.dataset.type = 'photo'; }
     }
     if (counter) counter.textContent = (index+1) + ' / ' + lightboxPhotos.length;
-    // Show/hide nav buttons
-    const btnPrev = document.getElementById('lb-prev');
-    const btnNext = document.getElementById('lb-next');
-    if (btnPrev) btnPrev.style.opacity = index > 0 ? '1' : '0.3';
-    if (btnNext) btnNext.style.opacity = index < lightboxPhotos.length-1 ? '1' : '0.3';
+    if (btnPrev) btnPrev.disabled = index === 0;
+    if (btnNext) btnNext.disabled = index === lightboxPhotos.length - 1;
     document.getElementById('lightbox').classList.add('open');
+  }
+
+
+  function dlLightbox(el) {
+    const url = el.href;
+    const filename = el.dataset.filename || 'felip50.jpg';
+    // Force download via blob fetch (works on mobile too)
+    fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(a.href); }, 1000);
+      })
+      .catch(() => {
+        // Fallback: open in new tab
+        window.open(url, '_blank');
+      });
+    return false;
   }
 
   function lbNav(dir) {
@@ -1818,4 +1944,16 @@
   document.querySelector('.hero-scroll').addEventListener('click', () => {
     document.getElementById('main-nav').scrollIntoView({ behavior: 'smooth' });
   });
+
+  // Swipe navigation
+  (function() {
+    var lb = document.getElementById('lightbox');
+    var touchStartX = 0;
+    lb.addEventListener('touchstart', function(e) { touchStartX = e.touches[0].clientX; }, {passive:true});
+    lb.addEventListener('touchend', function(e) {
+      var dx = e.changedTouches[0].clientX - touchStartX;
+      if (Math.abs(dx) > 50) lbNav(dx < 0 ? 1 : -1);
+    }, {passive:true});
+  })();
+
 </script>
