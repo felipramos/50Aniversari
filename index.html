@@ -34,9 +34,16 @@
     }
     .hero::before, .hero::after { display: none !important; }
     .hero-ornament, .hero-content, .hero-scroll { display: none !important; }
-    @media (max-width: 768px) {
-      .hero { min-height: 100svh; max-height: 100svh; }
-      .hero-photo-bg { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+    @media (max-width: 900px) {
+      .hero { min-height: 100svh; max-height: 100svh; height: 100svh; }
+      .hero-photo-bg {
+        width: 100% !important;
+        height: 100% !important;
+        left: 0 !important;
+        transform: none !important;
+        object-fit: cover !important;
+        object-position: center top !important;
+      }
     }
     /* ── NAV ── */
     nav {
@@ -414,6 +421,8 @@
       z-index: 1000;
       align-items: center;
       justify-content: center;
+      flex-direction: column;
+      gap: 1.5rem;
       padding: 2rem;
     }
 
@@ -605,7 +614,100 @@
       animation: float-sparkle var(--dur) ease-out infinite var(--delay);
       opacity: 0;
     }
-</style>
+
+  .section-header h2 { color: #fff !important; }
+  .section-header p  { color: rgba(255,255,255,0.85) !important; }
+  .form-group label  { color: #fff !important; font-size: 0.78rem !important; letter-spacing: 0.18em !important; }
+  .form-group input, .form-group textarea { color: #fff !important; }
+  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.55) !important; }
+  .drop-zone p { color: rgba(255,255,255,0.85) !important; }
+  .drop-zone p strong { color: #ffcc33 !important; }
+  .ded-card .ded-text { color: rgba(255,255,255,0.88) !important; }
+  .ded-card .ded-author { color: #ffcc33 !important; }
+  .gallery-empty, .gallery-empty * { color: rgba(255,255,255,0.8) !important; }
+  .status-msg { color: rgba(255,255,255,0.85) !important; }
+  .gold-line { background: linear-gradient(to right,transparent,#ffcc33,transparent) !important; }
+  nav a { color: rgba(255,255,255,0.75) !important; letter-spacing: 0.2em !important; }
+  nav a.active, nav a:hover { color: #ffcc33 !important; }
+  @media (max-width: 768px) {
+    .section-header { padding: 2rem 1.5rem 1.2rem !important; }
+    .section-header h2 { font-size: clamp(1.6rem,7vw,2.4rem) !important; }
+    .upload-area, .gallery-container, .ded-container { padding-bottom: 3rem !important; }
+  }
+
+
+  /* ── GALLERY ITEM SIZE ── */
+  .gallery-item img, .gallery-item video, .video-thumb {
+    width: 100% !important;
+    height: 160px !important;
+    object-fit: cover !important;
+    display: block !important;
+    border-radius: 4px 4px 0 0 !important;
+  }
+  .gallery-grid {
+    columns: 3 !important;
+    column-gap: 0.8rem !important;
+    gap: 0.8rem !important;
+  }
+  @media (max-width: 700px) {
+    .gallery-grid { columns: 2 !important; }
+    .gallery-item img, .gallery-item video { height: 120px !important; }
+  }
+  @media (max-width: 400px) {
+    .gallery-grid { columns: 2 !important; }
+    .gallery-item img, .gallery-item video { height: 100px !important; }
+  }
+
+  /* ── TOOLBAR CENTERED ── */
+  .gallery-toolbar {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 2rem !important;
+    flex-wrap: wrap !important;
+    padding: 1.5rem 1.5rem 2rem !important;
+    max-width: 1100px !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+  }
+  .gallery-toolbar label {
+    color: rgba(255,255,255,0.85) !important;
+    font-size: 0.82rem !important;
+    letter-spacing: 0.15em !important;
+    text-transform: uppercase !important;
+  }
+  .gallery-toolbar select {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: 1px solid rgba(255,204,51,0.5) !important;
+    border-radius: 4px !important;
+    padding: 0.45rem 1rem !important;
+    font-size: 0.88rem !important;
+    cursor: pointer !important;
+    outline: none !important;
+    font-family: 'Century Gothic', sans-serif !important;
+  }
+  .view-toggle {
+    display: flex !important;
+    border: 1px solid rgba(255,204,51,0.5) !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
+  }
+  .view-toggle button {
+    background: #4a6a3a !important;
+    color: #ffcc33 !important;
+    border: none !important;
+    padding: 0.45rem 1.2rem !important;
+    font-size: 0.82rem !important;
+    cursor: pointer !important;
+    letter-spacing: 0.1em !important;
+    font-family: 'Century Gothic', sans-serif !important;
+    transition: background 0.2s, color 0.2s !important;
+  }
+  .view-toggle button.active { background: #ffcc33 !important; color: #1a3214 !important; font-weight: 700 !important; }
+
+  </style>
 </head>
 <body>
 
@@ -821,10 +923,10 @@
   <img id="lightbox-img" style="display:block;max-width:92vw;max-height:82vh;border-radius:6px;" src="" alt="" />
   <video id="lightbox-video" controls playsinline style="display:none;max-width:92vw;max-height:82vh;border-radius:6px;"></video>
   <a id="lightbox-dl" href="#" download="felip50.jpg" onclick="event.stopPropagation()" style="
-    display:block; margin-top:1rem;
+    display:block; margin:0 auto;
     background:#ffcc33; color:#1a3214;
-    padding:0.6rem 2rem; border-radius:4px;
-    font-family:'Century Gothic',sans-serif; font-size:0.85rem;
+    padding:0.7rem 2.5rem; border-radius:6px;
+    font-family:'Century Gothic',sans-serif; font-size:0.88rem;
     font-weight:700; letter-spacing:0.2em; text-decoration:none;
     text-align:center; width:fit-content;
   ">&#11015; Descarregar</a>
@@ -1409,27 +1511,7 @@
     document.getElementById('main-nav').scrollIntoView({ behavior: 'smooth' });
   });
 </script>
-<style>
-  .section-header h2 { color: #fff !important; }
-  .section-header p  { color: rgba(255,255,255,0.85) !important; }
-  .form-group label  { color: #fff !important; font-size: 0.78rem !important; letter-spacing: 0.18em !important; }
-  .form-group input, .form-group textarea { color: #fff !important; }
-  .form-group input::placeholder, .form-group textarea::placeholder { color: rgba(255,255,255,0.55) !important; }
-  .drop-zone p { color: rgba(255,255,255,0.85) !important; }
-  .drop-zone p strong { color: #ffcc33 !important; }
-  .ded-card .ded-text { color: rgba(255,255,255,0.88) !important; }
-  .ded-card .ded-author { color: #ffcc33 !important; }
-  .gallery-empty, .gallery-empty * { color: rgba(255,255,255,0.8) !important; }
-  .status-msg { color: rgba(255,255,255,0.85) !important; }
-  .gold-line { background: linear-gradient(to right,transparent,#ffcc33,transparent) !important; }
-  nav a { color: rgba(255,255,255,0.75) !important; letter-spacing: 0.2em !important; }
-  nav a.active, nav a:hover { color: #ffcc33 !important; }
-  @media (max-width: 768px) {
-    .section-header { padding: 2rem 1.5rem 1.2rem !important; }
-    .section-header h2 { font-size: clamp(1.6rem,7vw,2.4rem) !important; }
-    .upload-area, .gallery-container, .ded-container { padding-bottom: 3rem !important; }
-  }
-</style>
+
 
   /* ── DOWNLOAD BTN MOSAIC ── */
   .gallery-dl-btn {
