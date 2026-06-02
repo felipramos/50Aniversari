@@ -1255,10 +1255,13 @@
     justify-content: center !important;
   }
   nav a {
-    font-size: 1.3rem !important;
-    letter-spacing: 0.2em !important;
-    padding: 1.1rem 2.5rem !important;
+    font-size: clamp(0.85rem, 4vw, 1.2rem) !important;
+    letter-spacing: 0.08em !important;
+    padding: 1rem 1rem !important;
     font-weight: 700 !important;
+    white-space: nowrap !important;
+    flex: 1 !important;
+    text-align: center !important;
   }
   nav a.active {
     display: none !important;
