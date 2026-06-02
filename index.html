@@ -1267,6 +1267,32 @@
     display: none !important;
   }
 
+  
+  /* ── DEDICATION CARDS ── */
+  .ded-card {
+    background: rgba(255,255,255,0.12) !important;
+    border-left: 3px solid #ffcc33 !important;
+    border-radius: 0 6px 6px 0 !important;
+    padding: 1.2rem 1.4rem !important;
+  }
+  .ded-card .ded-text {
+    color: #ffffff !important;
+    font-size: 1rem !important;
+    line-height: 1.7 !important;
+    font-style: italic !important;
+  }
+  .ded-card .ded-author {
+    color: #ffcc33 !important;
+    font-size: 0.8rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.15em !important;
+    margin-top: 0.6rem !important;
+  }
+  .ded-form {
+    background: rgba(255,255,255,0.1) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+  }
+
   </style></head>
 <body>
 
@@ -1425,7 +1451,7 @@
 
   <div class="ded-container">
     <div class="ded-form">
-      <h3>Escriu la teva <em>dedicatòria</em></h3>
+      
 
       <div class="form-group" style="margin-top:0">
         
@@ -1438,7 +1464,11 @@
       </div>
 
       <button class="btn-gold" id="ded-btn" onclick="saveDedication()">
-        ❤️ ENVIAR DEDICATÒRIA ❤️
+        <span style="display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;">
+          <span style="font-size:1.4rem;line-height:1;">❤️</span>
+          <span style="letter-spacing:0.2em;font-weight:900;">ENVIAR DEDICATÒRIA</span>
+          <span style="font-size:1.4rem;line-height:1;">❤️</span>
+        </span>
       </button>
 
       <div class="status-msg" id="ded-status"></div>
@@ -1906,7 +1936,7 @@
       }
 
     btn.disabled = false;
-    btn.innerHTML = '❤️ ENVIAR DEDICATÒRIA ❤️';
+    btn.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;gap:1rem;width:100%;"><span style="font-size:1.4rem;line-height:1;">❤️</span><span style="letter-spacing:0.2em;font-weight:900;">ENVIAR DEDICATÒRIA</span><span style="font-size:1.4rem;line-height:1;">❤️</span></span>';
   }
 
   async function loadDedications() {
