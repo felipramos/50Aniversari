@@ -1069,14 +1069,34 @@
   }
 
   
-  /* ── PREVENT COLUMN BREAK inside gallery items ── */
-  .gallery-item {
+  /* ── PREVENT COLUMN BREAK inside gallery items (mosaic only) ── */
+  .gallery-grid:not(.list-view) .gallery-item {
     break-inside: avoid !important;
     page-break-inside: avoid !important;
     -webkit-column-break-inside: avoid !important;
     display: inline-block !important;
     width: 100% !important;
     margin-bottom: 0.8rem !important;
+  }
+
+  /* ── LIST VIEW items: flex row, no column-break overrides ── */
+  .gallery-grid.list-view .gallery-item {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: flex-start !important;
+    width: 100% !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* ── LIST VIEW: thumbnail fixed size, not full width ── */
+  .gallery-grid.list-view .gallery-item img,
+  .gallery-grid.list-view .gallery-item video {
+    width: 100px !important;
+    height: 78px !important;
+    flex-shrink: 0 !important;
+    object-fit: cover !important;
+    border-radius: 4px !important;
+    aspect-ratio: unset !important;
   }
 
   
@@ -2261,7 +2281,7 @@ ENVIAR DEDICATÒRIA
         const msgHtml = p.msg ? `<p style="margin:0.35rem 0 0;font-size:0.92rem;color:rgba(255,255,255,0.92);font-style:italic;line-height:1.55;">"${p.msg}"</p>` : '';
         el.innerHTML = `
           <div onclick="openLightboxAt(${globalIdx})" style="flex-shrink:0;">${thumb}</div>
-          <div style="flex:1;min-width:0;">
+          <div style="flex:1;min-width:0;padding-top:0.3rem;">
             <p style="margin:0;font-size:0.82rem;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;font-weight:600;">${p.name || 'Convidat'}</p>
             ${msgHtml}
             <p style="margin:0.4rem 0 0;font-size:0.72rem;color:rgba(255,255,255,0.5);letter-spacing:0.05em;">${dateStr}</p>
