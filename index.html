@@ -1534,12 +1534,12 @@
 
   <div class="gallery-toolbar" id="gallery-toolbar">
     <div style="display:flex;align-items:center;gap:0.6rem;">
-      <label for="per-page-select">Per p&agrave;gina:</label>
-      <select id="per-page-select">
-        <option value="20">20</option>
-        <option value="50">50</option>
-        <option value="99999">Totes</option>
-      </select>
+      <label>Per p&agrave;gina:</label>
+      <div class="view-toggle" id="per-page-group">
+        <button class="pp-btn active" data-val="20" onclick="setPerPage(20,this)">20</button>
+        <button class="pp-btn" data-val="50" onclick="setPerPage(50,this)">50</button>
+        <button class="pp-btn" data-val="99999" onclick="setPerPage(99999,this)">Totes</button>
+      </div>
     </div>
     <div style="display:flex;align-items:center;gap:0.6rem;">
       <label>Vista:</label>
@@ -2218,6 +2218,7 @@ ENVIAR DEDICATÒRIA
   let allPhotos = [];
   let currentPage = 0;
   let currentView = 'mosaic';
+  let currentPerPage = 20;
   let lightboxPhotos = [];
   let currentLightboxIndex = -1;
 
@@ -2247,7 +2248,7 @@ ENVIAR DEDICATÒRIA
 
   function renderGalleryPage() {
     const grid = document.getElementById('gallery-grid');
-    const perPage = parseInt(document.getElementById('per-page-select').value) || 20;
+    const perPage = currentPerPage;
 
     if (allPhotos.length === 0) {
       grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
@@ -2319,7 +2320,7 @@ ENVIAR DEDICATÒRIA
   }
 
   function changePage(dir) {
-    const perPage = parseInt(document.getElementById('per-page-select').value) || 20;
+    const perPage = currentPerPage;
     const totalPages = Math.ceil(allPhotos.length / perPage);
     currentPage = Math.max(0, Math.min(totalPages - 1, currentPage + dir));
     renderGalleryPage();
@@ -2333,10 +2334,14 @@ ENVIAR DEDICATÒRIA
     renderGalleryPage();
   }
 
-  document.getElementById('per-page-select').addEventListener('change', () => {
+  function setPerPage(val, btn) {
+    currentPerPage = val;
     currentPage = 0;
+    // Update active button
+    document.querySelectorAll('.pp-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
     renderGalleryPage();
-  });
+  }
 
   // ══════════════════════════════════════════
   // LIGHTBOX
