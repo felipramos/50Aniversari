@@ -172,7 +172,7 @@
     .drop-icon {
       font-size: 2.5rem;
       margin-bottom: 1rem;
-      opacity: 0.5;
+      opacity: 1;
     }
 
     .drop-zone p {
@@ -1196,6 +1196,74 @@
     font-weight: 700 !important;
   }
 
+  
+  /* ── UPLOAD FORM OVERHAUL ── */
+  .drop-zone p strong {
+    font-size: 1.1rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.2em !important;
+    color: #ffcc33 !important;
+  }
+  .drop-zone p {
+    font-size: 0.9rem !important;
+  }
+  .form-group label {
+    display: none !important;
+  }
+  .form-group input,
+  .form-group textarea {
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+    color: #ffffff !important;
+    padding: 1rem 1.1rem !important;
+  }
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: rgba(255,255,255,0.75) !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.18em !important;
+  }
+  .form-group {
+    margin-top: 1rem !important;
+  }
+
+  
+  .drop-icon { font-size: unset !important; margin-bottom: 1rem !important; }
+  .drop-icon svg { display: block; margin: 0 auto; }
+
+  
+  #fotos-section .section-header h2 {
+    font-size: clamp(2.4rem, 8vw, 4rem) !important;
+  }
+
+  
+  #galeria-section .section-header h2 {
+    font-size: clamp(2.4rem, 8vw, 4rem) !important;
+  }
+
+  
+  #dedicatories-section .section-header h2 {
+    font-size: clamp(2.4rem, 8vw, 4rem) !important;
+  }
+
+  
+  /* ── NAV: bigger, hide active ── */
+  nav {
+    gap: 0 !important;
+    justify-content: center !important;
+  }
+  nav a {
+    font-size: 1.3rem !important;
+    letter-spacing: 0.2em !important;
+    padding: 1.1rem 2.5rem !important;
+    font-weight: 700 !important;
+  }
+  nav a.active {
+    display: none !important;
+  }
+
   </style></head>
 <body>
 
@@ -1265,7 +1333,7 @@
 <section class="section active" id="fotos-section">
   <div class="section-header">
     <h2>Puja les teves <em>fotos</em></h2>
-    <p>Comparteix els millors moments de la nit</p>
+    
     <div class="gold-line"></div>
   </div>
 
@@ -1273,25 +1341,33 @@
     <div class="drop-zone" id="drop-zone">
       <label for="file-input"></label>
       <input type="file" id="file-input" accept="image/*" multiple />
-      <div class="drop-icon">📷</div>
-      <p><strong>Toca aquí per seleccionar fotos</strong></p>
+      <div class="drop-icon">
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="6" y="22" width="60" height="42" rx="6" fill="none" stroke="#ffd700" stroke-width="4"/>
+    <path d="M24 22L28 12H44L48 22" stroke="#ffd700" stroke-width="4" stroke-linejoin="round"/>
+    <circle cx="36" cy="43" r="12" fill="none" stroke="#ffd700" stroke-width="4"/>
+    <circle cx="36" cy="43" r="5" fill="#ffd700"/>
+    <circle cx="56" cy="31" r="3" fill="#ffd700"/>
+  </svg>
+</div>
+      <p><strong>TOCA AQUÍ PER SELECCIONAR FOTOS</strong></p>
       <p style="margin-top:0.4rem; opacity:0.6;">o arrossega les imatges aquí · JPG, PNG, HEIC</p>
     </div>
 
     <div class="preview-grid" id="preview-grid"></div>
 
     <div class="form-group" style="margin-top:1.5rem;">
-      <label>El teu nom (opcional)</label>
-      <input type="text" id="upload-name" placeholder="Com et dius?" maxlength="60" />
+      
+      <input type="text" id="upload-name" placeholder="COM ET DIUS?" maxlength="60" />
     </div>
 
     <div class="form-group">
-      <label>Missatge (opcional)</label>
-      <textarea id="upload-msg" placeholder="Escriu alguna cosa per al Felip..." maxlength="300"></textarea>
+      
+      <textarea id="upload-msg" placeholder="ESCRIU UN MISSATGE PER AL FELIP..." maxlength="300"></textarea>
     </div>
 
     <button class="btn-gold" id="upload-btn" onclick="uploadPhotos()">
-      Pujar a la festa ✨
+      ★ PUJAR A LA FESTA ★
     </button>
 
     <div class="status-msg" id="status-msg"></div>
@@ -1304,7 +1380,7 @@
 <section class="section" id="galeria-section">
   <div class="section-header">
     <h2>La <em>galeria</em> de la nit</h2>
-    <p>Tots els records compartits</p>
+    
     <div class="gold-line"></div>
   </div>
 
@@ -1340,7 +1416,7 @@
 <section class="section" id="dedicatories-section">
   <div class="section-header">
     <h2><em>Dedicatòries</em> per al Felip</h2>
-    <p>Deixa un missatge per als seus 50 anys</p>
+    
     <div class="gold-line"></div>
   </div>
 
@@ -1349,8 +1425,8 @@
       <h3>Escriu la teva <em>dedicatòria</em></h3>
 
       <div class="form-group" style="margin-top:0">
-        <label>El teu nom</label>
-        <input type="text" id="ded-name" placeholder="Com et dius?" maxlength="60" />
+        
+        <input type="text" id="ded-name" placeholder="COM ET DIUS?" maxlength="60" />
       </div>
 
       <div class="form-group">
@@ -1359,7 +1435,7 @@
       </div>
 
       <button class="btn-gold" id="ded-btn" onclick="saveDedication()">
-        Enviar dedicatòria 💛
+        ❤️ ENVIAR DEDICATÒRIA ❤️
       </button>
 
       <div class="status-msg" id="ded-status"></div>
@@ -1580,7 +1656,7 @@
     }
 
     btn.disabled = false;
-    btn.innerHTML = 'Pujar a la festa ✨';
+    btn.innerHTML = '★ PUJAR A LA FESTA ★';
   }
 
   // ══════════════════════════════
@@ -1827,7 +1903,7 @@
       }
 
     btn.disabled = false;
-    btn.innerHTML = 'Enviar dedicatòria 💛';
+    btn.innerHTML = '❤️ ENVIAR DEDICATÒRIA ❤️';
   }
 
   async function loadDedications() {
