@@ -108,8 +108,9 @@
     }
 
     .section-header h2 em {
-      color: var(--gold-dark);
+      color: #f5c842;
       font-style: italic;
+      font-weight: 700;
     }
 
     .section-header p {
@@ -1113,7 +1114,7 @@
     position: fixed;
     top: 0; left: 0; right: 0; bottom: 0;
     width: 100vw; height: 100vh;
-    background: rgba(20,45,15,0.98);
+    background: #728f61;
     z-index: 9999;
     flex-direction: column;
     align-items: center;
@@ -1158,6 +1159,41 @@
     justify-content: center !important;
     overflow-y: auto !important;
     gap: 0.6rem !important;
+  }
+
+  
+  /* ── UPLOAD BUTTON ── */
+  .btn-gold {
+    color: #1a3214 !important;
+    font-size: 1.1rem !important;
+    font-weight: 900 !important;
+    letter-spacing: 0.25em !important;
+    text-shadow: none !important;
+  }
+
+  
+  /* ── DROP ZONE TEXT ── */
+  .drop-zone p strong { font-size: 1rem !important; font-weight: 700 !important; }
+  .drop-zone p { font-size: 0.92rem !important; line-height: 1.6 !important; }
+
+  
+  .drop-zone p strong { font-size: 1.15rem !important; font-weight: 700 !important; }
+  .drop-zone p { font-size: 1.05rem !important; }
+
+  
+  /* ── DED FORM TITLE ── */
+  .ded-form h3 {
+    color: #ffffff !important;
+    font-family: 'Cormorant Garamond', serif !important;
+    font-size: clamp(1.4rem, 4vw, 2rem) !important;
+    font-weight: 300 !important;
+    letter-spacing: 0.02em !important;
+    margin-bottom: 1.5rem !important;
+  }
+  .ded-form h3 em {
+    color: #f5c842 !important;
+    font-style: italic !important;
+    font-weight: 700 !important;
   }
 
   </style></head>
@@ -1310,7 +1346,7 @@
 
   <div class="ded-container">
     <div class="ded-form">
-      <h3>Escriu la teva dedicatòria</h3>
+      <h3>Escriu la teva <em>dedicatòria</em></h3>
 
       <div class="form-group" style="margin-top:0">
         <label>El teu nom</label>
