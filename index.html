@@ -1563,7 +1563,7 @@
       </div>
 
       <button class="btn-gold" id="ded-btn" onclick="saveDedication()">
-❤️ &nbsp; ENVIAR DEDICATÒRIA &nbsp; ❤️
+ENVIAR DEDICATÒRIA
       </button>
 
       <div class="status-msg" id="ded-status"></div>
@@ -1606,6 +1606,11 @@
     <h3 class="admin-section-title">✍️ Dedicatòries</h3>
     <div id="admin-ded-list">
       <div class="gallery-empty"><p>Carregant...</p></div>
+    </div>
+
+    <h3 class="admin-section-title">🗒️ Registre d'accions</h3>
+    <div id="admin-audit-log" style="margin-bottom:2rem;">
+      <div class="gallery-empty"><p>Carregant registre...</p></div>
     </div>
   </div>
 </section>
@@ -1736,7 +1741,7 @@
 
 
     btn.disabled = true;
-        btn.innerHTML = '❤️ &nbsp; ENVIAR DEDICATÒRIA &nbsp; ❤️';
+        btn.innerHTML = 'ENVIAR DEDICATÒRIA';
 
     const entry = { name, msg: text, date: new Date().toISOString() };
 
@@ -1751,7 +1756,7 @@
       }
 
     btn.disabled = false;
-    btn.innerHTML = '❤️ &nbsp; ENVIAR DEDICATÒRIA &nbsp; ❤️';
+    btn.innerHTML = 'ENVIAR DEDICATÒRIA';
   }
 
   async function loadDedications() {
@@ -1869,6 +1874,7 @@
       const pass = prompt('Contrasenya administrador:');
       if (pass === ADMIN_PASS) {
         adminUnlocked = true;
+        addAuditEntry('ADMIN_LOGIN', 'Sessió administrativa iniciada');
         document.getElementById('admin-bar').style.display = 'block';
         // Add admin to nav
         const nav = document.getElementById('main-nav');
@@ -1886,6 +1892,7 @@
 
   async function loadAdminPanel() {
     if (!adminUnlocked) return;
+    renderAuditLog();
     const photoGrid = document.getElementById('admin-photo-grid');
     const dedList = document.getElementById('admin-ded-list');
     photoGrid.innerHTML = '<div class="gallery-empty"><p><span class="loader"></span> Carregant...</p></div>';
@@ -1939,9 +1946,85 @@
     }
   }
 
+  // ══════════════════════════════
+  // AUDIT LOG
+  // ══════════════════════════════
+  function getAuditLog() {
+    try {
+      return JSON.parse(localStorage.getItem('felip50_audit') || '[]');
+    } catch(e) { return []; }
+  }
+
+  function addAuditEntry(action, details) {
+    const log = getAuditLog();
+    log.unshift({
+      ts: new Date().toISOString(),
+      action,
+      details
+    });
+    // Keep max 200 entries
+    if (log.length > 200) log.splice(200);
+    localStorage.setItem('felip50_audit', JSON.stringify(log));
+  }
+
+  function renderAuditLog() {
+    const container = document.getElementById('admin-audit-log');
+    if (!container) return;
+    const log = getAuditLog();
+    if (log.length === 0) {
+      container.innerHTML = '<div class="gallery-empty"><p>Cap acció registrada encara.</p></div>';
+      return;
+    }
+    const actionIcon = { 'ELIMINAR_FOTO': '🗑📷', 'ELIMINAR_DEDICATORIA': '🗑✍️', 'ADMIN_LOGIN': '🔑' };
+    const rows = log.map(e => {
+      const d = new Date(e.ts);
+      const dateStr = d.toLocaleDateString('ca-ES', { day:'2-digit', month:'2-digit', year:'numeric' });
+      const timeStr = d.toLocaleTimeString('ca-ES', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      const icon = actionIcon[e.action] || '📋';
+      return `<div style="display:flex; align-items:flex-start; gap:1rem; padding:0.75rem 1rem; border-bottom:1px solid rgba(201,168,76,0.1); font-size:0.8rem;">
+        <span style="font-size:1.1rem; flex-shrink:0;">${icon}</span>
+        <div style="flex:1;">
+          <span style="color:var(--gold); font-weight:600; letter-spacing:0.05em;">${e.action.replace('_',' ')}</span>
+          <span style="color:var(--mid); margin-left:0.8rem;">${e.details}</span>
+        </div>
+        <div style="color:#888; white-space:nowrap; font-size:0.7rem;">${dateStr} ${timeStr}</div>
+      </div>`;
+    }).join('');
+    container.innerHTML = `
+      <div style="background:var(--dark); border:1px solid rgba(201,168,76,0.2); border-radius:6px; overflow:hidden; margin-bottom:1rem;">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:0.8rem 1rem; border-bottom:1px solid rgba(201,168,76,0.2);">
+          <span style="font-size:0.65rem; letter-spacing:0.3em; text-transform:uppercase; color:var(--gold);">${log.length} acció${log.length !== 1 ? 'ns' : ''} registrada${log.length !== 1 ? 'des' : ''}</span>
+          <button onclick="clearAuditLog()" style="background:none; border:1px solid rgba(201,168,76,0.3); color:#888; font-size:0.65rem; letter-spacing:0.15em; padding:0.3rem 0.8rem; border-radius:3px; cursor:pointer; text-transform:uppercase;">🗑 Esborrar registre</button>
+        </div>
+        <div style="max-height:350px; overflow-y:auto;">${rows}</div>
+      </div>`;
+  }
+
+  function clearAuditLog() {
+    if (!confirm('Segur que vols esborrar tot el registre d\'accions?')) return;
+    localStorage.removeItem('felip50_audit');
+    renderAuditLog();
+  }
+
   async function deleteEntry(id, type) {
     const label = type === 'photo' ? 'aquesta foto' : 'aquesta dedicatòria';
     if (!confirm(`Segur que vols eliminar ${label}?`)) return;
+
+    // Capture details before deleting
+    const card = document.getElementById('entry-' + id);
+    let details = `ID #${id}`;
+    if (card) {
+      if (type === 'photo') {
+        const meta = card.querySelector('.admin-meta strong');
+        if (meta) details += ` · ${meta.textContent}`;
+      } else {
+        const strong = card.querySelector('.ded-content strong');
+        const p = card.querySelector('.ded-content p');
+        if (strong) details += ` · ${strong.textContent}`;
+        if (p) details += ` · "${p.textContent.substring(0, 60)}${p.textContent.length > 60 ? '…' : ''}"`;
+      }
+    }
+
     try {
       console.log('Deleting entry id:', id, 'type:', type);
       const deleteHeaders = {
@@ -1960,6 +2043,11 @@
         return;
       }
       if (r.ok) {
+        // Register in audit log
+        const action = type === 'photo' ? 'ELIMINAR_FOTO' : 'ELIMINAR_DEDICATORIA';
+        addAuditEntry(action, details);
+        renderAuditLog();
+
         // Remove from admin panel
         document.getElementById('entry-' + id).remove();
         // Reset cache and reload gallery from Supabase
@@ -2029,6 +2117,149 @@
       `;
       container.appendChild(dot);
     }
+  }
+
+  // ══════════════════════════════════════════
+  // GALERIA — VARIABLES
+  // ══════════════════════════════════════════
+  let allPhotos = [];
+  let currentPage = 0;
+  let currentView = 'mosaic';
+  let lightboxPhotos = [];
+  let currentLightboxIndex = -1;
+
+  // ══════════════════════════════════════════
+  // GALERIA — CARREGA I RENDERITZA
+  // ══════════════════════════════════════════
+  async function loadGallery() {
+    const grid = document.getElementById('gallery-grid');
+    grid.innerHTML = '<div class="gallery-empty"><p>Carregant fotos... 📸</p></div>';
+    try {
+      const data = await fetchBinData();
+      allPhotos = (data.photos || []).slice().reverse(); // newest first
+      lightboxPhotos = allPhotos.map(p => ({ url: p.url, name: p.name, date: p.date }));
+      currentPage = 0;
+      renderGalleryPage();
+    } catch(e) {
+      grid.innerHTML = '<div class="gallery-empty"><p>Error carregant les fotos. Torna-ho a intentar.</p></div>';
+    }
+    // Auto-refresh every 30s while gallery is visible
+    stopGalleryRefresh();
+    galleryRefreshInterval = setInterval(() => {
+      if (document.getElementById('galeria-section').classList.contains('active')) {
+        loadGallery();
+      }
+    }, 30000);
+  }
+
+  function renderGalleryPage() {
+    const grid = document.getElementById('gallery-grid');
+    const perPage = parseInt(document.getElementById('per-page-select').value) || 20;
+
+    if (allPhotos.length === 0) {
+      grid.innerHTML = '<div class="gallery-empty"><p>Encara no hi ha fotos · Sigues el primer a compartir! 📸</p></div>';
+      return;
+    }
+
+    const start = currentPage * perPage;
+    const pagePhotos = perPage >= 99999 ? allPhotos : allPhotos.slice(start, start + perPage);
+    const totalPages = perPage >= 99999 ? 1 : Math.ceil(allPhotos.length / perPage);
+
+    grid.innerHTML = '';
+    if (currentView === 'list') {
+      grid.classList.add('list-view');
+    } else {
+      grid.classList.remove('list-view');
+    }
+
+    pagePhotos.forEach((p, i) => {
+      const el = document.createElement('div');
+      el.className = 'gallery-item';
+      const globalIdx = start + i;
+      const isVideo = p.url && (p.url.includes('/video/') || /\.(mp4|mov|webm)(\?|$)/i.test(p.url));
+      const dateStr = p.date ? new Date(p.date).toLocaleDateString('ca-ES', { day:'2-digit', month:'2-digit' }) : '';
+
+      if (isVideo) {
+        el.innerHTML = `
+          <div class="video-thumb" onclick="openLightboxAt(${globalIdx})" style="position:relative;cursor:pointer;">
+            <video src="${p.url}" muted playsinline preload="metadata" style="width:100%;display:block;max-height:220px;object-fit:cover;"></video>
+            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.5rem;pointer-events:none;">▶️</div>
+          </div>
+          <div class="photo-meta">${p.name || ''}</div>`;
+      } else {
+        el.innerHTML = `
+          <img src="${p.url}" alt="${p.name || ''}" loading="lazy" onclick="openLightboxAt(${globalIdx})" />
+          <div class="photo-meta">${p.name || ''}${dateStr ? ' · ' + dateStr : ''}</div>`;
+      }
+      grid.appendChild(el);
+    });
+
+    // Pagination controls
+    if (totalPages > 1) {
+      const pag = document.createElement('div');
+      pag.style.cssText = 'width:100%;text-align:center;padding:1.5rem 0;display:flex;justify-content:center;align-items:center;gap:1rem;';
+      pag.innerHTML = `
+        <button onclick="changePage(-1)" ${currentPage === 0 ? 'disabled' : ''} style="background:none;border:1px solid var(--gold);color:var(--gold);padding:0.4rem 1rem;border-radius:3px;cursor:pointer;font-size:0.75rem;letter-spacing:0.1em;">◀ Anterior</button>
+        <span style="color:var(--gold-light);font-size:0.75rem;letter-spacing:0.1em;">${currentPage + 1} / ${totalPages}</span>
+        <button onclick="changePage(1)" ${currentPage >= totalPages - 1 ? 'disabled' : ''} style="background:none;border:1px solid var(--gold);color:var(--gold);padding:0.4rem 1rem;border-radius:3px;cursor:pointer;font-size:0.75rem;letter-spacing:0.1em;">Següent ▶</button>
+      `;
+      grid.appendChild(pag);
+    }
+  }
+
+  function changePage(dir) {
+    const perPage = parseInt(document.getElementById('per-page-select').value) || 20;
+    const totalPages = Math.ceil(allPhotos.length / perPage);
+    currentPage = Math.max(0, Math.min(totalPages - 1, currentPage + dir));
+    renderGalleryPage();
+    document.getElementById('gallery-grid').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function setView(v) {
+    currentView = v;
+    document.getElementById('view-mosaic').classList.toggle('active', v === 'mosaic');
+    document.getElementById('view-list').classList.toggle('active', v === 'list');
+    renderGalleryPage();
+  }
+
+  document.getElementById('per-page-select').addEventListener('change', () => {
+    currentPage = 0;
+    renderGalleryPage();
+  });
+
+  // ══════════════════════════════════════════
+  // LIGHTBOX
+  // ══════════════════════════════════════════
+  function openLightboxAt(idx) {
+    if (idx < 0 || idx >= lightboxPhotos.length) return;
+    currentLightboxIndex = idx;
+    const p = lightboxPhotos[idx];
+    const lb = document.getElementById('lightbox');
+    const img = document.getElementById('lightbox-img');
+    const vid = document.getElementById('lightbox-video');
+    const counter = document.getElementById('lightbox-counter');
+    const meta = document.getElementById('lb-meta');
+
+    const isVideo = p.url && (p.url.includes('/video/') || /\.(mp4|mov|webm)(\?|$)/i.test(p.url));
+
+    if (isVideo) {
+      img.style.display = 'none'; img.src = '';
+      vid.src = p.url; vid.style.display = 'block'; vid.play();
+    } else {
+      if (vid) { vid.pause(); vid.src = ''; vid.style.display = 'none'; }
+      img.src = p.url; img.style.display = 'block';
+    }
+
+    if (counter) counter.textContent = `${idx + 1} / ${lightboxPhotos.length}`;
+    if (meta) {
+      const dateStr = p.date ? new Date(p.date).toLocaleDateString('ca-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
+      meta.innerHTML = [p.name, dateStr].filter(Boolean).join(' · ');
+    }
+    lb.classList.add('open');
+  }
+
+  function lbNav(dir) {
+    openLightboxAt(currentLightboxIndex + dir);
   }
 
   createSparkles();
