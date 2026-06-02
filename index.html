@@ -2210,7 +2210,7 @@ ENVIAR DEDICATÒRIA
     try {
       const data = await fetchBinData();
       allPhotos = (data.photos || []).slice().reverse(); // newest first
-      lightboxPhotos = allPhotos.map(p => ({ url: p.url, name: p.name, date: p.date }));
+      lightboxPhotos = allPhotos.map(p => ({ url: p.url, name: p.name, date: p.date, msg: p.msg }));
       currentPage = 0;
       renderGalleryPage();
     } catch(e) {
@@ -2254,17 +2254,17 @@ ENVIAR DEDICATÒRIA
       if (currentView === 'list') {
         // ── VISTA LLISTA: miniatura + nom + comentari
         el.className = 'gallery-item';
-        el.style.cssText = 'display:flex;align-items:flex-start;gap:1rem;padding:0.75rem 0;border-bottom:1px solid rgba(201,168,76,0.15);cursor:pointer;';
+        el.style.cssText = 'display:flex;align-items:flex-start;gap:1rem;padding:0.9rem 0.5rem;border-bottom:1px solid rgba(201,168,76,0.15);cursor:pointer;background:transparent;';
         const thumb = isVideo
-          ? `<video src="${p.url}" muted playsinline preload="metadata" style="width:90px;height:70px;object-fit:cover;border-radius:3px;flex-shrink:0;"></video>`
-          : `<img src="${p.url}" loading="lazy" style="width:90px;height:70px;object-fit:cover;border-radius:3px;flex-shrink:0;" />`;
-        const msgHtml = p.msg ? `<p style="margin:0.25rem 0 0;font-size:0.82rem;color:rgba(255,255,255,0.75);font-style:italic;line-height:1.5;">"${p.msg}"</p>` : '';
+          ? `<video src="${p.url}" muted playsinline preload="metadata" style="width:100px;height:78px;object-fit:cover;border-radius:4px;flex-shrink:0;"></video>`
+          : `<img src="${p.url}" loading="lazy" style="width:100px;height:78px;object-fit:cover;border-radius:4px;flex-shrink:0;" />`;
+        const msgHtml = p.msg ? `<p style="margin:0.35rem 0 0;font-size:0.92rem;color:rgba(255,255,255,0.92);font-style:italic;line-height:1.55;">"${p.msg}"</p>` : '';
         el.innerHTML = `
           <div onclick="openLightboxAt(${globalIdx})" style="flex-shrink:0;">${thumb}</div>
           <div style="flex:1;min-width:0;">
-            <p style="margin:0;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;">${p.name || 'Convidat'}</p>
+            <p style="margin:0;font-size:0.82rem;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;font-weight:600;">${p.name || 'Convidat'}</p>
             ${msgHtml}
-            <p style="margin:0.3rem 0 0;font-size:0.65rem;color:rgba(255,255,255,0.4);letter-spacing:0.05em;">${dateStr}</p>
+            <p style="margin:0.4rem 0 0;font-size:0.72rem;color:rgba(255,255,255,0.5);letter-spacing:0.05em;">${dateStr}</p>
           </div>`;
       } else {
         // ── VISTA MOSAIC
@@ -2344,7 +2344,9 @@ ENVIAR DEDICATÒRIA
     if (counter) counter.textContent = `${idx + 1} / ${lightboxPhotos.length}`;
     if (meta) {
       const dateStr = p.date ? new Date(p.date).toLocaleDateString('ca-ES', { day:'2-digit', month:'2-digit', year:'numeric' }) : '';
-      meta.innerHTML = [p.name, dateStr].filter(Boolean).join(' · ');
+      const nameDateLine = [p.name, dateStr].filter(Boolean).join(' · ');
+      const msgLine = p.msg ? `<br><em style="font-size:0.9rem;color:rgba(255,255,255,0.82);font-style:italic;">"${p.msg}"</em>` : '';
+      meta.innerHTML = nameDateLine + msgLine;
     }
     lb.classList.add('open');
   }
