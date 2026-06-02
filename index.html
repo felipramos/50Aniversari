@@ -878,7 +878,6 @@
   .list-msg {
     color: rgba(255,255,255,0.8) !important;
     font-size: 0.8rem !important;
-    font-style: italic !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -1054,7 +1053,6 @@
   .list-msg {
     color: rgba(255,255,255,0.8) !important;
     font-size: 0.8rem !important;
-    font-style: italic !important;
     white-space: nowrap !important;
     overflow: hidden !important;
     text-overflow: ellipsis !important;
@@ -1192,7 +1190,6 @@
   }
   .ded-form h3 em {
     color: #f5c842 !important;
-    font-style: italic !important;
     font-weight: 700 !important;
   }
 
@@ -1279,7 +1276,6 @@
     color: #ffffff !important;
     font-size: 1rem !important;
     line-height: 1.7 !important;
-    font-style: italic !important;
   }
   .ded-card .ded-author {
     color: #ffcc33 !important;
@@ -1298,7 +1294,6 @@
     font-size: 1.15rem !important;
     line-height: 1.7 !important;
     color: #ffffff !important;
-    font-style: italic !important;
   }
   .ded-card .ded-author {
     font-size: 0.95rem !important;
@@ -1972,10 +1967,9 @@
     deds.slice().reverse().forEach(d => {
       const card = document.createElement('div');
       card.className = 'ded-card';
-      const dateStr = new Date(d.date).toLocaleDateString('ca', { day: 'numeric', month: 'long', year: 'numeric' });
       card.innerHTML = `
         <p class="ded-text">« ${d.msg} »</p>
-        <p class="ded-author">— ${d.name} · ${dateStr}</p>
+        <p class="ded-author">— ${d.name}</p>
       `;
       list.appendChild(card);
     });
