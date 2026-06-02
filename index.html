@@ -1730,33 +1730,106 @@ ENVIAR DEDICATÒRIA
   // PUJA FOTOS
   // ══════════════════════════════
   async function uploadPhotos() {
-    const name = document.getElementById('upload-name').value.trim();
-    const msg  = document.getElementById('upload-msg').value.trim();
-    const btn  = document.getElementById('upload-btn');
+    const name   = document.getElementById('upload-name').value.trim();
+    const msg    = document.getElementById('upload-msg').value.trim();
+    const btn    = document.getElementById('upload-btn');
     const status = document.getElementById('status-msg');
 
-    if (selectedFiles.length === 0) { showStatus(status, 'error', 'Selecciona almenys una foto.'); return; }
+    if (selectedFiles.length === 0) {
+      showStatus(status, 'error', 'Selecciona almenys una foto.');
+      return;
+    }
+
     const displayName = name || 'Convidat';
-
-
-
     btn.disabled = true;
-        btn.innerHTML = 'ENVIAR DEDICATÒRIA';
+    btn.textContent = 'Pujant...';
 
-    const entry = { name, msg: text, date: new Date().toISOString() };
+    let uploaded = 0;
+    let errors   = 0;
 
-    try {
-        await saveRow({ ...entry, type: 'dedication' });
-        showStatus(status, 'success', `✅ Dedicatòria guardada. Gràcies, ${name}! 💛`);
-        document.getElementById('ded-name').value = '';
-        document.getElementById('ded-text').value = '';
-        loadDedications();
+    for (const file of selectedFiles) {
+      try {
+        // 1. Upload to Cloudinary
+        const fd = new FormData();
+        fd.append('file', file);
+        fd.append('upload_preset', CONFIG.cloudinary.uploadPreset);
+        const cr = await fetch(
+          `https://api.cloudinary.com/v1_1/${CONFIG.cloudinary.cloudName}/auto/upload`,
+          { method: 'POST', body: fd }
+        );
+        if (!cr.ok) throw new Error('Cloudinary ' + cr.status);
+        const cd = await cr.json();
+        const url = cd.secure_url;
+
+        // 2. Save metadata to Supabase
+        await saveRow({
+          type: 'photo',
+          url,
+          name: displayName,
+          msg,
+          date: new Date().toISOString()
+        });
+        uploaded++;
       } catch(e) {
-        showStatus(status, 'error', 'Error en guardar. Torna-ho a intentar.');
+        console.error('Upload error:', e);
+        errors++;
       }
+    }
 
     btn.disabled = false;
-    btn.innerHTML = 'ENVIAR DEDICATÒRIA';
+    btn.textContent = 'PUJAR FOTOS';
+
+    if (uploaded > 0) {
+      showStatus(status, 'success',
+        `✅ ${uploaded} foto${uploaded > 1 ? 's' : ''} pujada${uploaded > 1 ? 's' : ''}! Gràcies, ${displayName}! 📸`
+      );
+      // Clear form
+      selectedFiles = [];
+      document.getElementById('upload-name').value = '';
+      document.getElementById('upload-msg').value  = '';
+      const preview = document.getElementById('preview-container');
+      if (preview) preview.innerHTML = '';
+      // Refresh gallery if visible
+      allPhotos = [];
+      currentPage = 0;
+      if (document.getElementById('galeria-section').classList.contains('active')) {
+        setTimeout(() => loadGallery(), 800);
+      }
+    }
+    if (errors > 0) {
+      showStatus(status, 'error', `⚠️ ${errors} foto${errors > 1 ? 's' : ''} no s'han pogut pujar.`);
+    }
+  }
+
+  async function saveDedication() {
+    const name   = document.getElementById('ded-name').value.trim();
+    const text   = document.getElementById('ded-text').value.trim();
+    const btn    = document.getElementById('ded-btn');
+    const status = document.getElementById('ded-status');
+
+    if (!name) { showStatus(status, 'error', 'Escriu el teu nom.'); return; }
+    if (!text)  { showStatus(status, 'error', 'Escriu la teva dedicatòria.'); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Enviant...';
+
+    try {
+      await saveRow({
+        type: 'dedication',
+        name,
+        msg: text,
+        date: new Date().toISOString()
+      });
+      showStatus(status, 'success', `✅ Dedicatòria guardada. Gràcies, ${name}! 💛`);
+      document.getElementById('ded-name').value = '';
+      document.getElementById('ded-text').value = '';
+      loadDedications();
+    } catch(e) {
+      showStatus(status, 'error', 'Error en guardar. Torna-ho a intentar.');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'ENVIAR DEDICATÒRIA';
   }
 
   async function loadDedications() {
@@ -2174,22 +2247,40 @@ ENVIAR DEDICATÒRIA
 
     pagePhotos.forEach((p, i) => {
       const el = document.createElement('div');
-      el.className = 'gallery-item';
       const globalIdx = start + i;
       const isVideo = p.url && (p.url.includes('/video/') || /\.(mp4|mov|webm)(\?|$)/i.test(p.url));
       const dateStr = p.date ? new Date(p.date).toLocaleDateString('ca-ES', { day:'2-digit', month:'2-digit' }) : '';
 
-      if (isVideo) {
+      if (currentView === 'list') {
+        // ── VISTA LLISTA: miniatura + nom + comentari
+        el.className = 'gallery-item';
+        el.style.cssText = 'display:flex;align-items:flex-start;gap:1rem;padding:0.75rem 0;border-bottom:1px solid rgba(201,168,76,0.15);cursor:pointer;';
+        const thumb = isVideo
+          ? `<video src="${p.url}" muted playsinline preload="metadata" style="width:90px;height:70px;object-fit:cover;border-radius:3px;flex-shrink:0;"></video>`
+          : `<img src="${p.url}" loading="lazy" style="width:90px;height:70px;object-fit:cover;border-radius:3px;flex-shrink:0;" />`;
+        const msgHtml = p.msg ? `<p style="margin:0.25rem 0 0;font-size:0.82rem;color:rgba(255,255,255,0.75);font-style:italic;line-height:1.5;">"${p.msg}"</p>` : '';
         el.innerHTML = `
-          <div class="video-thumb" onclick="openLightboxAt(${globalIdx})" style="position:relative;cursor:pointer;">
-            <video src="${p.url}" muted playsinline preload="metadata" style="width:100%;display:block;max-height:220px;object-fit:cover;"></video>
-            <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.5rem;pointer-events:none;">▶️</div>
-          </div>
-          <div class="photo-meta">${p.name || ''}</div>`;
+          <div onclick="openLightboxAt(${globalIdx})" style="flex-shrink:0;">${thumb}</div>
+          <div style="flex:1;min-width:0;">
+            <p style="margin:0;font-size:0.75rem;letter-spacing:0.1em;color:var(--gold);text-transform:uppercase;">${p.name || 'Convidat'}</p>
+            ${msgHtml}
+            <p style="margin:0.3rem 0 0;font-size:0.65rem;color:rgba(255,255,255,0.4);letter-spacing:0.05em;">${dateStr}</p>
+          </div>`;
       } else {
-        el.innerHTML = `
-          <img src="${p.url}" alt="${p.name || ''}" loading="lazy" onclick="openLightboxAt(${globalIdx})" />
-          <div class="photo-meta">${p.name || ''}${dateStr ? ' · ' + dateStr : ''}</div>`;
+        // ── VISTA MOSAIC
+        el.className = 'gallery-item';
+        if (isVideo) {
+          el.innerHTML = `
+            <div class="video-thumb" onclick="openLightboxAt(${globalIdx})" style="position:relative;cursor:pointer;">
+              <video src="${p.url}" muted playsinline preload="metadata" style="width:100%;display:block;max-height:220px;object-fit:cover;"></video>
+              <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:2.5rem;pointer-events:none;">▶️</div>
+            </div>
+            <div class="photo-meta">${p.name || ''}</div>`;
+        } else {
+          el.innerHTML = `
+            <img src="${p.url}" alt="${p.name || ''}" loading="lazy" onclick="openLightboxAt(${globalIdx})" />
+            <div class="photo-meta">${p.name || ''}${dateStr ? ' · ' + dateStr : ''}</div>`;
+        }
       }
       grid.appendChild(el);
     });
@@ -2256,6 +2347,30 @@ ENVIAR DEDICATÒRIA
       meta.innerHTML = [p.name, dateStr].filter(Boolean).join(' · ');
     }
     lb.classList.add('open');
+  }
+
+  function dlLightbox(a) {
+    const p = lightboxPhotos[currentLightboxIndex];
+    if (!p) return false;
+    const url = p.url;
+    // Force download via fetch + blob
+    fetch(url)
+      .then(r => r.blob())
+      .then(blob => {
+        const ext = url.split('?')[0].split('.').pop() || 'jpg';
+        const filename = `felip50_${currentLightboxIndex + 1}.${ext}`;
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = blobUrl;
+        link.download = filename;
+        link.click();
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
+      })
+      .catch(() => {
+        // Fallback: open in new tab
+        window.open(url, '_blank');
+      });
+    return false;
   }
 
   function lbNav(dir) {
